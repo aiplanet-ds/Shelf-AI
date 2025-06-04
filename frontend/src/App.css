@@ -53,9 +53,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Premium App Layout */
+/* Premium App Layout - Full Width */
 .premium-app {
   min-height: 100vh;
+  width: 100%;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 25%, #f1f5f9 75%, #f8fafc 100%);
 }
 
@@ -64,6 +65,19 @@ body {
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--premium-border);
   box-shadow: var(--shadow-soft);
+  width: 100%;
+}
+
+.premium-app-header .max-w-7xl {
+  max-width: none;
+  width: 100%;
+  padding: 0 3rem;
+}
+
+.premium-app > .max-w-7xl {
+  max-width: none;
+  width: 100%;
+  padding: 0 3rem;
 }
 
 .premium-brand {
