@@ -266,16 +266,17 @@ body {
   background: linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.9) 100%);
   border-top: 1px solid var(--premium-border-muted);
   backdrop-filter: blur(5px);
+  padding: 2rem;
 }
 
 .premium-input {
   width: 100%;
-  padding: 1rem 1.5rem;
+  padding: 1.25rem 1.75rem;
   border: 2px solid var(--premium-border);
-  border-radius: 1rem;
+  border-radius: 1.25rem;
   background: var(--premium-surface);
   color: var(--premium-text-primary);
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 500;
   transition: var(--transition-fast);
   box-shadow: var(--shadow-soft);
@@ -288,12 +289,13 @@ body {
 }
 
 .premium-send-button {
-  padding: 1rem 1.5rem;
+  padding: 1.25rem 2rem;
   background: var(--gradient-accent);
   color: white;
   border: none;
-  border-radius: 1rem;
+  border-radius: 1.25rem;
   font-weight: 600;
+  font-size: 1rem;
   transition: var(--transition-fast);
   box-shadow: var(--shadow-medium);
   cursor: pointer;
