@@ -163,7 +163,7 @@ body {
   margin-top: 1rem;
 }
 
-/* Premium Card System */
+/* Premium Chat Interface - Larger and More Spacious */
 .premium-card {
   background: var(--gradient-card);
   border-radius: 1.5rem;
@@ -172,6 +172,7 @@ body {
   overflow: hidden;
   transition: var(--transition-normal);
   backdrop-filter: blur(10px);
+  min-height: 600px;
 }
 
 .premium-card:hover {
@@ -183,6 +184,7 @@ body {
   background: linear-gradient(135deg, rgba(248, 250, 252, 0.8) 0%, rgba(241, 245, 249, 0.8) 100%);
   border-bottom: 1px solid var(--premium-border-muted);
   backdrop-filter: blur(5px);
+  padding: 2rem;
 }
 
 /* Premium Chat Interface */
