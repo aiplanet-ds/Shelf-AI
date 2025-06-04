@@ -20,13 +20,13 @@ const WireShelf3D = ({ width, length, postHeight, numberOfShelves, color, shelfS
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xf8fafb);
     
-    const camera = new THREE.PerspectiveCamera(75, 900 / 600, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ 
-      antialias: true, 
+    const camera = new THREE.PerspectiveCamera(75, 1200 / 800, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
       alpha: true,
       powerPreference: "high-performance"
     });
-    renderer.setSize(900, 600);
+    renderer.setSize(1200, 800);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -398,43 +398,43 @@ const ChatInterface = ({ onParametersExtracted, extractedParams, sessionId }) =>
   };
 
   return (
-    <div className="premium-card h-[650px] flex flex-col">
-      <div className="premium-header p-6 pb-4">
+    <div className="premium-card h-[800px] flex flex-col">
+      <div className="premium-header">
         <div className="flex items-center">
-          <div className="premium-avatar mr-4">
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+          <div className="premium-avatar mr-6">
+            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 2C5.58 2 2 5.58 2 10s3.58 8 8 8c1.86 0 3.58-.63 4.95-1.69L17.71 18.1c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41l-1.79-1.79C18.37 13.58 19 11.86 19 10c0-4.42-3.58-8-8-8zm0 2c3.32 0 6 2.68 6 6s-2.68 6-6 6-6-2.68-6-6 2.68-6 6-6z" clipRule="evenodd" />
             </svg>
           </div>
-          <div>
-            <h3 className="text-xl font-bold text-slate-800">Wire Shelf Designer</h3>
-            <p className="text-slate-500 font-medium">Professional AI Assistant</p>
+          <div className="flex-1">
+            <h3 className="text-2xl font-bold text-slate-800 mb-1">Wire Shelf Designer</h3>
+            <p className="text-slate-600 font-medium text-lg">Professional AI Assistant</p>
           </div>
           <div className="ml-auto">
             <div className="premium-status-badge">
               <div className="status-dot animate-pulse"></div>
-              <span>Online</span>
+              <span className="text-base font-semibold">Online</span>
             </div>
           </div>
         </div>
       </div>
       
-      <div className="flex-1 overflow-y-auto px-6 pb-4 space-y-4 premium-scrollbar">
+      <div className="flex-1 overflow-y-auto px-8 pb-6 space-y-6 premium-scrollbar">
         {messages.map((message, index) => (
           <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] px-5 py-4 rounded-2xl font-medium ${
-              message.type === 'user' 
-                ? 'premium-user-message text-white ml-6' 
-                : 'premium-ai-message text-slate-700 mr-6'
+            <div className={`max-w-[80%] font-medium ${
+              message.type === 'user'
+                ? 'premium-user-message text-white ml-8'
+                : 'premium-ai-message text-slate-700 mr-8'
             }`}>
-              <p className="leading-relaxed">{message.content}</p>
+              <p className="leading-relaxed text-base">{message.content}</p>
             </div>
           </div>
         ))}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="premium-ai-message text-slate-700 px-5 py-4 rounded-2xl mr-6">
-              <div className="flex items-center space-x-2">
+            <div className="premium-ai-message text-slate-700 mr-8">
+              <div className="flex items-center space-x-3">
                 <div className="premium-loading-dot"></div>
                 <div className="premium-loading-dot" style={{animationDelay: '0.15s'}}></div>
                 <div className="premium-loading-dot" style={{animationDelay: '0.3s'}}></div>
@@ -444,14 +444,14 @@ const ChatInterface = ({ onParametersExtracted, extractedParams, sessionId }) =>
         )}
       </div>
       
-      <div className="premium-input-container p-6">
-        <div className="flex space-x-4">
+      <div className="premium-input-container">
+        <div className="flex space-x-6">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             className="premium-input flex-1"
-            placeholder="Describe your shelving requirements..."
+            placeholder="Describe your shelving requirements in detail..."
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
             disabled={isLoading}
           />
@@ -460,7 +460,7 @@ const ChatInterface = ({ onParametersExtracted, extractedParams, sessionId }) =>
             disabled={isLoading || !input.trim()}
             className="premium-send-button"
           >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
               <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
             </svg>
           </button>

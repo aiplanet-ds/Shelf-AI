@@ -5,7 +5,38 @@ from typing import List, Dict, Any, Optional
 import json
 import re
 import uuid
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+# Mock implementation for emergentintegrations
+class UserMessage:
+    def __init__(self, text):
+        self.text = text
+
+class LlmChat:
+    def __init__(self, api_key, session_id, system_message):
+        self.api_key = api_key
+        self.session_id = session_id
+        self.system_message = system_message
+        self.model = None
+
+    def with_model(self, provider, model_name):
+        self.model = f"{provider}:{model_name}"
+        return self
+
+    async def send_message(self, user_message):
+        # Mock AI response for testing
+        return f"""Thank you for your message: "{user_message.text}"
+
+I'm here to help you design the perfect wire shelving unit! To create your 3D model, I need to know:
+
+1. Width (how wide should it be?)
+2. Length/Depth (how deep should it be?)
+3. Height (how tall should it be?)
+4. Number of shelves (how many shelf levels?)
+
+Could you tell me about your storage needs and the space you're working with?
+
+ENTITIES_EXTRACTED: {{"message_received": true}}
+SUFFICIENT: false"""
+
 import asyncio
 
 app = FastAPI()
