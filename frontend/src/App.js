@@ -6,7 +6,7 @@ import './App.css';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// Enhanced Wire Shelf 3D Component with better visual representation
+// Enhanced Wire Shelf 3D Component with premium materials
 const WireShelf3D = ({ width, length, postHeight, numberOfShelves, color, shelfStyle, solidBottomShelf, postType }) => {
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
@@ -16,89 +16,108 @@ const WireShelf3D = ({ width, length, postHeight, numberOfShelves, color, shelfS
   useEffect(() => {
     if (!mountRef.current) return;
 
-    // Scene setup with better lighting and materials
+    // Premium scene setup with sophisticated lighting
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xfafbfc);
+    scene.background = new THREE.Color(0xf8fafb);
     
     const camera = new THREE.PerspectiveCamera(75, 900 / 600, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = new THREE.WebGLRenderer({ 
+      antialias: true, 
+      alpha: true,
+      powerPreference: "high-performance"
+    });
     renderer.setSize(900, 600);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
     
     // Clear previous content
     mountRef.current.innerHTML = '';
     mountRef.current.appendChild(renderer.domElement);
 
-    // Enhanced lighting setup
-    const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+    // Premium lighting setup for photorealistic appearance
+    const ambientLight = new THREE.AmbientLight(0x404040, 0.3);
     scene.add(ambientLight);
     
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    directionalLight.position.set(50, 50, 50);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    directionalLight.position.set(50, 60, 40);
     directionalLight.castShadow = true;
-    directionalLight.shadow.mapSize.width = 2048;
-    directionalLight.shadow.mapSize.height = 2048;
+    directionalLight.shadow.mapSize.width = 4096;
+    directionalLight.shadow.mapSize.height = 4096;
+    directionalLight.shadow.camera.near = 0.5;
+    directionalLight.shadow.camera.far = 200;
     scene.add(directionalLight);
 
-    const pointLight = new THREE.PointLight(0xffffff, 0.3, 100);
-    pointLight.position.set(-20, 30, 20);
-    scene.add(pointLight);
+    const rimLight = new THREE.DirectionalLight(0x4a90e2, 0.4);
+    rimLight.position.set(-30, 20, -30);
+    scene.add(rimLight);
 
-    // Enhanced material system based on color and style
+    const fillLight = new THREE.PointLight(0xffffff, 0.2, 100);
+    fillLight.position.set(10, 20, 30);
+    scene.add(fillLight);
+
+    // Premium material system with realistic properties
     const getColorHex = (colorName) => {
       const colors = {
-        'Chrome': 0xc0c0c0,
-        'Black': 0x2d2d30,
-        'White': 0xf8f9fa,
-        'Stainless Steel': 0xe8e9ea,
-        'Bronze': 0xcd7f32
+        'Chrome': 0xe8e9ea,
+        'Black': 0x1a1a1a,
+        'White': 0xfafbfc,
+        'Stainless Steel': 0xd1d5db,
+        'Bronze': 0xb08d57
       };
-      return colors[colorName] || 0xc0c0c0;
+      return colors[colorName] || 0xe8e9ea;
     };
 
-    const createMaterials = (colorName, style) => {
+    const createPremiumMaterials = (colorName, style) => {
       const baseColor = getColorHex(colorName);
       
-      // Different materials based on style
+      // Premium material properties for each style
       const materialProps = {
-        'Industrial Grid': { metalness: 0.8, roughness: 0.3, emissive: 0x000000 },
-        'Metro Classic': { metalness: 0.6, roughness: 0.4, emissive: 0x111111 },
-        'Commercial Pro': { metalness: 0.9, roughness: 0.2, emissive: 0x000000 },
-        'Heavy Duty': { metalness: 0.7, roughness: 0.5, emissive: 0x000000 }
+        'Industrial Grid': { metalness: 0.9, roughness: 0.2, clearcoat: 0.1 },
+        'Metro Classic': { metalness: 0.7, roughness: 0.3, clearcoat: 0.05 },
+        'Commercial Pro': { metalness: 0.95, roughness: 0.15, clearcoat: 0.2 },
+        'Heavy Duty': { metalness: 0.8, roughness: 0.25, clearcoat: 0.0 }
       };
       
       const props = materialProps[style] || materialProps['Industrial Grid'];
       
       return {
-        wire: new THREE.MeshStandardMaterial({
+        wire: new THREE.MeshPhysicalMaterial({
           color: baseColor,
           metalness: props.metalness,
           roughness: props.roughness,
-          emissive: props.emissive
+          clearcoat: props.clearcoat,
+          clearcoatRoughness: 0.05,
+          reflectivity: 0.9,
+          envMapIntensity: 1.5
         }),
-        solid: new THREE.MeshStandardMaterial({
+        solid: new THREE.MeshPhysicalMaterial({
           color: baseColor,
-          metalness: props.metalness * 0.8,
-          roughness: props.roughness + 0.1
+          metalness: props.metalness * 0.9,
+          roughness: props.roughness + 0.1,
+          clearcoat: props.clearcoat * 0.5,
+          reflectivity: 0.8
         }),
-        post: new THREE.MeshStandardMaterial({
+        post: new THREE.MeshPhysicalMaterial({
           color: baseColor,
           metalness: props.metalness,
-          roughness: props.roughness - 0.1
+          roughness: props.roughness - 0.05,
+          clearcoat: props.clearcoat,
+          reflectivity: 0.95
         })
       };
     };
 
-    const materials = createMaterials(color, shelfStyle);
+    const materials = createPremiumMaterials(color, shelfStyle);
 
     // Create wire shelf group
     const shelfGroup = new THREE.Group();
 
-    // Enhanced Posts with better geometry
+    // Premium Posts with enhanced geometry
     const postRadius = 0.4;
-    const postGeometry = new THREE.CylinderGeometry(postRadius, postRadius, postHeight, 16);
+    const postGeometry = new THREE.CylinderGeometry(postRadius, postRadius, postHeight, 24);
     const postPositions = [
       [-width/2, postHeight/2, -length/2],
       [width/2, postHeight/2, -length/2],
@@ -114,85 +133,94 @@ const WireShelf3D = ({ width, length, postHeight, numberOfShelves, color, shelfS
       shelfGroup.add(post);
     });
 
-    // Enhanced Shelves with style-specific patterns
+    // Premium Shelves with sophisticated patterns
     const shelfSpacing = postHeight / (numberOfShelves + 1);
     
     for (let i = 0; i < numberOfShelves; i++) {
       const shelfY = (i + 1) * shelfSpacing;
       
       if (solidBottomShelf && i === 0) {
-        // Enhanced solid bottom shelf
-        const solidShelfGeometry = new THREE.BoxGeometry(width, 0.2, length);
+        // Premium solid bottom shelf
+        const solidShelfGeometry = new THREE.BoxGeometry(width, 0.25, length);
         const solidShelf = new THREE.Mesh(solidShelfGeometry, materials.solid);
         solidShelf.position.set(0, shelfY, 0);
         solidShelf.castShadow = true;
         solidShelf.receiveShadow = true;
         
-        // Add reinforcement edges
-        const edgeGeometry = new THREE.BoxGeometry(width + 0.2, 0.3, 0.2);
+        // Premium reinforcement edges
+        const edgeGeometry = new THREE.BoxGeometry(width + 0.3, 0.35, 0.25);
         const frontEdge = new THREE.Mesh(edgeGeometry, materials.wire);
-        frontEdge.position.set(0, shelfY, length/2 + 0.1);
+        frontEdge.position.set(0, shelfY, length/2 + 0.125);
         const backEdge = new THREE.Mesh(edgeGeometry, materials.wire);
-        backEdge.position.set(0, shelfY, -length/2 - 0.1);
+        backEdge.position.set(0, shelfY, -length/2 - 0.125);
         
         shelfGroup.add(solidShelf, frontEdge, backEdge);
       } else {
-        // Enhanced wire shelf with style-specific patterns
+        // Premium wire shelf with style-specific patterns
         const wireGroup = new THREE.Group();
         
-        // Style-specific wire patterns
-        let wireSpacing, wireThickness;
+        // Style-specific premium wire patterns
+        let wireSpacing, wireThickness, segments;
         switch (shelfStyle) {
           case 'Industrial Grid':
             wireSpacing = 1.5;
             wireThickness = 0.08;
+            segments = 12;
             break;
           case 'Metro Classic':
             wireSpacing = 2.0;
             wireThickness = 0.06;
+            segments = 16;
             break;
           case 'Commercial Pro':
             wireSpacing = 1.0;
             wireThickness = 0.1;
+            segments = 20;
             break;
           case 'Heavy Duty':
             wireSpacing = 1.2;
             wireThickness = 0.12;
+            segments = 16;
             break;
           default:
             wireSpacing = 1.5;
             wireThickness = 0.08;
+            segments = 12;
         }
         
-        // Horizontal wires (length direction)
+        // Horizontal wires with premium geometry
         const numLengthWires = Math.floor(width / wireSpacing) + 1;
         for (let j = 0; j < numLengthWires; j++) {
-          const wireGeometry = new THREE.CylinderGeometry(wireThickness, wireThickness, length, 8);
+          const wireGeometry = new THREE.CylinderGeometry(wireThickness, wireThickness, length, segments);
           const wire = new THREE.Mesh(wireGeometry, materials.wire);
           wire.rotation.x = Math.PI / 2;
           wire.position.set(-width/2 + (j * width/(numLengthWires-1)), shelfY, 0);
           wire.castShadow = true;
+          wire.receiveShadow = true;
           wireGroup.add(wire);
         }
         
-        // Vertical wires (width direction)
+        // Vertical wires with premium geometry
         const numWidthWires = Math.floor(length / wireSpacing) + 1;
         for (let j = 0; j < numWidthWires; j++) {
-          const wireGeometry = new THREE.CylinderGeometry(wireThickness, wireThickness, width, 8);
+          const wireGeometry = new THREE.CylinderGeometry(wireThickness, wireThickness, width, segments);
           const wire = new THREE.Mesh(wireGeometry, materials.wire);
           wire.rotation.z = Math.PI / 2;
           wire.position.set(0, shelfY, -length/2 + (j * length/(numWidthWires-1)));
           wire.castShadow = true;
+          wire.receiveShadow = true;
           wireGroup.add(wire);
         }
         
-        // Add frame reinforcement for Heavy Duty style
+        // Premium frame reinforcement for Heavy Duty style
         if (shelfStyle === 'Heavy Duty') {
-          const frameGeometry = new THREE.BoxGeometry(width, 0.15, 0.15);
+          const frameGeometry = new THREE.BoxGeometry(width, 0.2, 0.2);
           const frontFrame = new THREE.Mesh(frameGeometry, materials.wire);
           frontFrame.position.set(0, shelfY, length/2);
+          frontFrame.castShadow = true;
           const backFrame = new THREE.Mesh(frameGeometry, materials.wire);
           backFrame.position.set(0, shelfY, -length/2);
+          backFrame.castShadow = true;
           wireGroup.add(frontFrame, backFrame);
         }
         
@@ -200,9 +228,9 @@ const WireShelf3D = ({ width, length, postHeight, numberOfShelves, color, shelfS
       }
     }
 
-    // Enhanced frame supports
-    const frameThickness = 0.15;
-    const frameGeometry = new THREE.CylinderGeometry(frameThickness, frameThickness, width, 8);
+    // Premium frame supports
+    const frameThickness = 0.18;
+    const frameGeometry = new THREE.CylinderGeometry(frameThickness, frameThickness, width, 16);
     const supportLevels = numberOfShelves > 4 ? 3 : 2;
     
     for (let level = 1; level <= supportLevels; level++) {
@@ -217,32 +245,43 @@ const WireShelf3D = ({ width, length, postHeight, numberOfShelves, color, shelfS
         frameMesh.position.set(frame.pos[0], frame.pos[1], frame.pos[2]);
         frameMesh.rotation.set(frame.rot[0], frame.rot[1], frame.rot[2]);
         frameMesh.castShadow = true;
+        frameMesh.receiveShadow = true;
         shelfGroup.add(frameMesh);
       });
     }
 
-    // Add casters for mobile units
+    // Premium casters for mobile units
     if (postType === 'Mobile') {
-      const casterGeometry = new THREE.SphereGeometry(0.8, 16, 16);
-      const casterMaterial = new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.3, roughness: 0.7 });
+      const casterGeometry = new THREE.SphereGeometry(0.9, 24, 24);
+      const casterMaterial = new THREE.MeshPhysicalMaterial({ 
+        color: 0x2a2a2a, 
+        metalness: 0.2, 
+        roughness: 0.8,
+        clearcoat: 0.1
+      });
       
       postPositions.forEach(pos => {
         const caster = new THREE.Mesh(casterGeometry, casterMaterial);
-        caster.position.set(pos[0], 0.8, pos[2]);
+        caster.position.set(pos[0], 0.9, pos[2]);
         caster.castShadow = true;
         shelfGroup.add(caster);
         
-        // Add caster plate
-        const plateGeometry = new THREE.CylinderGeometry(1.2, 1.2, 0.3, 16);
+        // Premium caster plate
+        const plateGeometry = new THREE.CylinderGeometry(1.3, 1.3, 0.35, 24);
         const plate = new THREE.Mesh(plateGeometry, materials.post);
-        plate.position.set(pos[0], 1.2, pos[2]);
+        plate.position.set(pos[0], 1.3, pos[2]);
+        plate.castShadow = true;
         shelfGroup.add(plate);
       });
     }
 
-    // Add ground plane
-    const groundGeometry = new THREE.PlaneGeometry(100, 100);
-    const groundMaterial = new THREE.MeshLambertMaterial({ color: 0xf5f5f5, transparent: true, opacity: 0.3 });
+    // Premium ground plane with subtle gradient
+    const groundGeometry = new THREE.PlaneGeometry(120, 120);
+    const groundMaterial = new THREE.MeshLambertMaterial({ 
+      color: 0xf1f3f4, 
+      transparent: true, 
+      opacity: 0.4 
+    });
     const ground = new THREE.Mesh(groundGeometry, groundMaterial);
     ground.rotation.x = -Math.PI / 2;
     ground.position.y = -0.1;
@@ -251,13 +290,13 @@ const WireShelf3D = ({ width, length, postHeight, numberOfShelves, color, shelfS
 
     scene.add(shelfGroup);
 
-    // Enhanced camera positioning
-    const distance = Math.max(width, length, postHeight) * 1.8;
-    camera.position.set(distance * 0.8, distance * 0.6, distance * 0.8);
+    // Premium camera positioning
+    const distance = Math.max(width, length, postHeight) * 1.6;
+    camera.position.set(distance * 0.7, distance * 0.5, distance * 0.9);
     camera.lookAt(0, postHeight/2, 0);
 
-    // Animation loop with smooth rotation
-    let rotationSpeed = 0.003;
+    // Smooth animation with premium easing
+    let rotationSpeed = 0.002;
     const animate = () => {
       frameRef.current = requestAnimationFrame(animate);
       
@@ -284,10 +323,14 @@ const WireShelf3D = ({ width, length, postHeight, numberOfShelves, color, shelfS
     };
   }, [width, length, postHeight, numberOfShelves, color, shelfStyle, solidBottomShelf, postType]);
 
-  return <div ref={mountRef} className="border-2 border-gray-200 rounded-xl shadow-xl overflow-hidden" />;
+  return (
+    <div className="premium-3d-container">
+      <div ref={mountRef} className="rounded-2xl overflow-hidden shadow-premium" />
+    </div>
+  );
 };
 
-// Enhanced Chat Component with Real Gemini AI
+// Premium Chat Component with sophisticated design
 const ChatInterface = ({ onParametersExtracted, extractedParams, sessionId }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -355,65 +398,79 @@ const ChatInterface = ({ onParametersExtracted, extractedParams, sessionId }) =>
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-xl p-6 h-[500px] flex flex-col">
-      <div className="flex items-center mb-4 pb-4 border-b border-gray-200">
-        <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center mr-3">
-          <span className="text-white font-bold text-lg">AI</span>
-        </div>
-        <div>
-          <h3 className="font-semibold text-gray-800">Wire Shelf Designer</h3>
-          <p className="text-sm text-gray-500">Professional design assistant</p>
+    <div className="premium-card h-[550px] flex flex-col">
+      <div className="premium-header p-6 pb-4">
+        <div className="flex items-center">
+          <div className="premium-avatar mr-4">
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 2C5.58 2 2 5.58 2 10s3.58 8 8 8c1.86 0 3.58-.63 4.95-1.69L17.71 18.1c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41l-1.79-1.79C18.37 13.58 19 11.86 19 10c0-4.42-3.58-8-8-8zm0 2c3.32 0 6 2.68 6 6s-2.68 6-6 6-6-2.68-6-6 2.68-6 6-6z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-slate-800">Wire Shelf Designer</h3>
+            <p className="text-slate-500 font-medium">Professional AI Assistant</p>
+          </div>
+          <div className="ml-auto">
+            <div className="premium-status-badge">
+              <div className="status-dot animate-pulse"></div>
+              <span>Online</span>
+            </div>
+          </div>
         </div>
       </div>
       
-      <div className="flex-1 overflow-y-auto space-y-4 mb-4 pr-2">
+      <div className="flex-1 overflow-y-auto px-6 pb-4 space-y-4 premium-scrollbar">
         {messages.map((message, index) => (
           <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] px-4 py-3 rounded-2xl shadow-sm ${
+            <div className={`max-w-[85%] px-5 py-4 rounded-2xl font-medium ${
               message.type === 'user' 
-                ? 'bg-blue-500 text-white ml-4' 
-                : 'bg-gray-100 text-gray-800 mr-4'
+                ? 'premium-user-message text-white ml-6' 
+                : 'premium-ai-message text-slate-700 mr-6'
             }`}>
-              <p className="text-sm leading-relaxed">{message.content}</p>
+              <p className="leading-relaxed">{message.content}</p>
             </div>
           </div>
         ))}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-gray-100 text-gray-800 px-4 py-3 rounded-2xl mr-4">
+            <div className="premium-ai-message text-slate-700 px-5 py-4 rounded-2xl mr-6">
               <div className="flex items-center space-x-2">
-                <div className="animate-bounce w-2 h-2 bg-gray-500 rounded-full"></div>
-                <div className="animate-bounce w-2 h-2 bg-gray-500 rounded-full" style={{animationDelay: '0.1s'}}></div>
-                <div className="animate-bounce w-2 h-2 bg-gray-500 rounded-full" style={{animationDelay: '0.2s'}}></div>
+                <div className="premium-loading-dot"></div>
+                <div className="premium-loading-dot" style={{animationDelay: '0.15s'}}></div>
+                <div className="premium-loading-dot" style={{animationDelay: '0.3s'}}></div>
               </div>
             </div>
           </div>
         )}
       </div>
       
-      <div className="flex space-x-3">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          className="flex-1 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="Describe your shelving needs..."
-          onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-          disabled={isLoading}
-        />
-        <button
-          onClick={handleSend}
-          disabled={isLoading || !input.trim()}
-          className="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium"
-        >
-          Send
-        </button>
+      <div className="premium-input-container p-6">
+        <div className="flex space-x-4">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            className="premium-input flex-1"
+            placeholder="Describe your shelving requirements..."
+            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+            disabled={isLoading}
+          />
+          <button
+            onClick={handleSend}
+            disabled={isLoading || !input.trim()}
+            className="premium-send-button"
+          >
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
-// Enhanced Parameter Controls Component
+// Premium Parameter Controls Component
 const ParameterControls = ({ params, onParamsChange }) => {
   const updateParam = (key, value) => {
     onParamsChange({ ...params, [key]: value });
@@ -422,81 +479,86 @@ const ParameterControls = ({ params, onParamsChange }) => {
   const hasRequiredParams = params.width && params.length && params.postHeight && params.numberOfShelves;
 
   return (
-    <div className="bg-white rounded-xl shadow-xl p-6 space-y-5">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-bold text-gray-800">Configuration</h3>
-        {hasRequiredParams && (
-          <span className="bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-medium">
-            Ready to Build
-          </span>
-        )}
+    <div className="premium-card space-y-6">
+      <div className="premium-header p-6 pb-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xl font-bold text-slate-800">Configuration Panel</h3>
+          {hasRequiredParams && (
+            <div className="premium-ready-badge">
+              <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              Ready to Build
+            </div>
+          )}
+        </div>
       </div>
       
-      <div className="space-y-4">
+      <div className="px-6 pb-6 space-y-6">
         {/* Required Parameters */}
-        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-          <h4 className="font-semibold text-blue-800 mb-3">Required Dimensions</h4>
-          <div className="space-y-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Width (inches)</label>
+        <div className="premium-section-required">
+          <h4 className="premium-section-title mb-4">Essential Dimensions</h4>
+          <div className="space-y-4">
+            <div className="premium-input-group">
+              <label className="premium-label">Width (inches)</label>
               <input
                 type="number"
                 value={params.width || ''}
                 onChange={(e) => updateParam('width', parseInt(e.target.value) || 0)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="premium-number-input"
                 min="12" max="96"
-                placeholder="e.g., 36"
+                placeholder="36"
               />
             </div>
             
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Length (inches)</label>
+            <div className="premium-input-group">
+              <label className="premium-label">Length (inches)</label>
               <input
                 type="number"
                 value={params.length || ''}
                 onChange={(e) => updateParam('length', parseInt(e.target.value) || 0)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="premium-number-input"
                 min="12" max="96"
-                placeholder="e.g., 18"
+                placeholder="18"
               />
             </div>
             
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Height (inches)</label>
+            <div className="premium-input-group">
+              <label className="premium-label">Height (inches)</label>
               <input
                 type="number"
                 value={params.postHeight || ''}
                 onChange={(e) => updateParam('postHeight', parseInt(e.target.value) || 0)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="premium-number-input"
                 min="24" max="84"
-                placeholder="e.g., 72"
+                placeholder="72"
               />
             </div>
             
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Number of Shelves</label>
+            <div className="premium-input-group">
+              <label className="premium-label">Number of Shelves</label>
               <input
                 type="number"
                 value={params.numberOfShelves || ''}
                 onChange={(e) => updateParam('numberOfShelves', parseInt(e.target.value) || 0)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="premium-number-input"
                 min="2" max="8"
-                placeholder="e.g., 4"
+                placeholder="4"
               />
             </div>
           </div>
         </div>
 
         {/* Optional Parameters */}
-        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-          <h4 className="font-semibold text-gray-800 mb-3">Style & Finish Options</h4>
-          <div className="space-y-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Color & Finish</label>
+        <div className="premium-section-optional">
+          <h4 className="premium-section-title mb-4">Style & Finish Options</h4>
+          <div className="space-y-4">
+            <div className="premium-input-group">
+              <label className="premium-label">Color & Finish</label>
               <select
                 value={params.color || 'Chrome'}
                 onChange={(e) => updateParam('color', e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="premium-select"
               >
                 <option value="Chrome">Chrome</option>
                 <option value="Black">Black</option>
@@ -506,12 +568,12 @@ const ParameterControls = ({ params, onParamsChange }) => {
               </select>
             </div>
             
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Shelf Style</label>
+            <div className="premium-input-group">
+              <label className="premium-label">Shelf Style</label>
               <select
                 value={params.shelfStyle || 'Industrial Grid'}
                 onChange={(e) => updateParam('shelfStyle', e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="premium-select"
               >
                 <option value="Industrial Grid">Industrial Grid</option>
                 <option value="Metro Classic">Metro Classic</option>
@@ -520,31 +582,31 @@ const ParameterControls = ({ params, onParamsChange }) => {
               </select>
             </div>
             
-            <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200">
-              <div>
-                <label className="text-sm font-medium text-gray-700">Solid Bottom Shelf</label>
-                <p className="text-xs text-gray-500">More stable for heavy items</p>
+            <div className="premium-toggle-container">
+              <div className="premium-toggle-info">
+                <label className="premium-label">Solid Bottom Shelf</label>
+                <p className="premium-sublabel">Enhanced stability for heavy items</p>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
+              <label className="premium-toggle">
                 <input
                   type="checkbox"
                   checked={params.solidBottomShelf || false}
                   onChange={(e) => updateParam('solidBottomShelf', e.target.checked)}
-                  className="sr-only peer"
+                  className="sr-only"
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <div className="premium-toggle-slider"></div>
               </label>
             </div>
             
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Post Type</label>
+            <div className="premium-input-group">
+              <label className="premium-label">Mobility Type</label>
               <select
                 value={params.postType || 'Stationary'}
                 onChange={(e) => updateParam('postType', e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="premium-select"
               >
                 <option value="Stationary">Stationary</option>
-                <option value="Mobile">Mobile (with casters)</option>
+                <option value="Mobile">Mobile (with premium casters)</option>
               </select>
             </div>
           </div>
@@ -554,7 +616,7 @@ const ParameterControls = ({ params, onParamsChange }) => {
   );
 };
 
-// Enhanced Bill of Materials Component
+// Premium Bill of Materials Component
 const BillOfMaterials = ({ params }) => {
   const generateBOM = () => {
     if (!params.width || !params.length || !params.postHeight || !params.numberOfShelves) {
@@ -565,24 +627,26 @@ const BillOfMaterials = ({ params }) => {
     
     // Posts
     items.push({
-      description: `Vertical Posts - ${params.shelfStyle || 'Standard'}`,
+      description: `Vertical Support Posts - ${params.shelfStyle || 'Standard'} Series`,
       modelNumber: `VP-${params.postHeight}-${params.color?.replace(/\s+/g, '') || 'Chrome'}`,
       quantity: 4,
       length: `${params.postHeight}"`,
       width: `0.8"`,
-      colorFinish: params.color || 'Chrome'
+      colorFinish: params.color || 'Chrome',
+      category: 'Structure'
     });
 
     // Shelves
     for (let i = 0; i < params.numberOfShelves; i++) {
       if (params.solidBottomShelf && i === 0) {
         items.push({
-          description: 'Solid Bottom Shelf Panel',
+          description: 'Premium Solid Bottom Shelf Panel',
           modelNumber: `SBS-${params.width}x${params.length}-${params.color?.replace(/\s+/g, '') || 'Chrome'}`,
           quantity: 1,
           length: `${params.length}"`,
           width: `${params.width}"`,
-          colorFinish: params.color || 'Chrome'
+          colorFinish: params.color || 'Chrome',
+          category: 'Shelving'
         });
       } else {
         const wireSpacing = params.shelfStyle === 'Commercial Pro' ? '1" Grid' : 
@@ -590,12 +654,13 @@ const BillOfMaterials = ({ params }) => {
                            params.shelfStyle === 'Heavy Duty' ? '1.2" Grid' : '1.5" Grid';
         
         items.push({
-          description: `Wire Shelf - ${params.shelfStyle || 'Industrial Grid'} (${wireSpacing})`,
+          description: `Premium Wire Shelf - ${params.shelfStyle || 'Industrial Grid'} (${wireSpacing})`,
           modelNumber: `WS-${params.width}x${params.length}-${params.shelfStyle?.replace(/\s+/g, '') || 'IG'}-${params.color?.replace(/\s+/g, '') || 'Chrome'}`,
           quantity: 1,
           length: `${params.length}"`,
           width: `${params.width}"`,
-          colorFinish: params.color || 'Chrome'
+          colorFinish: params.color || 'Chrome',
+          category: 'Shelving'
         });
       }
     }
@@ -603,34 +668,37 @@ const BillOfMaterials = ({ params }) => {
     // Frame supports
     const supportCount = params.numberOfShelves > 4 ? 6 : 4;
     items.push({
-      description: 'Frame Support Rails',
+      description: 'Reinforcement Frame Support Rails',
       modelNumber: `FSR-${params.width}-${params.color?.replace(/\s+/g, '') || 'Chrome'}`,
       quantity: supportCount,
       length: `${params.width}"`,
-      width: `0.3"`,
-      colorFinish: params.color || 'Chrome'
+      width: `0.35"`,
+      colorFinish: params.color || 'Chrome',
+      category: 'Structure'
     });
 
     // Hardware
     const clipCount = params.numberOfShelves * 4;
     items.push({
-      description: 'Shelf Clips & Mounting Hardware',
-      modelNumber: `SCH-${clipCount}`,
+      description: 'Premium Shelf Clips & Mounting Hardware Kit',
+      modelNumber: `SCH-${clipCount}-PRO`,
       quantity: clipCount,
       length: '-',
       width: '-',
-      colorFinish: params.color || 'Chrome'
+      colorFinish: params.color || 'Chrome',
+      category: 'Hardware'
     });
 
     // Casters if mobile
     if (params.postType === 'Mobile') {
       items.push({
-        description: 'Heavy Duty Swivel Casters (4" wheels)',
-        modelNumber: `HDC-4-${params.color?.replace(/\s+/g, '') || 'Chrome'}`,
+        description: 'Heavy Duty Swivel Casters (4" Premium Wheels)',
+        modelNumber: `HDC-4-PRO-${params.color?.replace(/\s+/g, '') || 'Chrome'}`,
         quantity: 4,
         length: '4"',
         width: '4"',
-        colorFinish: params.color || 'Chrome'
+        colorFinish: params.color || 'Chrome',
+        category: 'Mobility'
       });
     }
 
@@ -641,61 +709,93 @@ const BillOfMaterials = ({ params }) => {
   const estimatedWeight = bomItems.length > 0 ? 
     Math.round(params.width * params.length * params.numberOfShelves * 0.8 + params.postHeight * 2) : 0;
 
+  const categoryColors = {
+    'Structure': 'bg-slate-100 text-slate-800',
+    'Shelving': 'bg-blue-100 text-blue-800',
+    'Hardware': 'bg-amber-100 text-amber-800',
+    'Mobility': 'bg-emerald-100 text-emerald-800'
+  };
+
   return (
-    <div className="bg-white rounded-xl shadow-xl p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-bold text-gray-800">Bill of Materials</h3>
-        {bomItems.length > 0 && (
-          <div className="text-right">
-            <p className="text-sm text-gray-600">Estimated Weight: <span className="font-semibold">{estimatedWeight} lbs</span></p>
-            <p className="text-sm text-gray-600">Total Components: <span className="font-semibold">{bomItems.reduce((sum, item) => sum + item.quantity, 0)}</span></p>
+    <div className="premium-card">
+      <div className="premium-header p-6 pb-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-2xl font-bold text-slate-800">Bill of Materials</h3>
+            <p className="text-slate-500 font-medium mt-1">Professional specification sheet</p>
           </div>
-        )}
+          {bomItems.length > 0 && (
+            <div className="text-right">
+              <div className="premium-spec-badge mb-2">
+                <span className="text-sm">Est. Weight:</span>
+                <span className="font-bold ml-2">{estimatedWeight} lbs</span>
+              </div>
+              <div className="premium-spec-badge">
+                <span className="text-sm">Components:</span>
+                <span className="font-bold ml-2">{bomItems.reduce((sum, item) => sum + item.quantity, 0)}</span>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
       
       {bomItems.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="text-gray-400 text-6xl mb-4">📋</div>
-          <p className="text-gray-500 text-lg">Complete the configuration to see the bill of materials</p>
-          <p className="text-gray-400 text-sm mt-2">Chat with our AI assistant to get started!</p>
+        <div className="premium-empty-state p-12">
+          <div className="text-center">
+            <div className="premium-empty-icon mb-6">
+              <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <h4 className="text-xl font-bold text-slate-700 mb-2">Ready to Generate BOM</h4>
+            <p className="text-slate-500 max-w-md mx-auto">Complete your configuration using our AI assistant to generate a detailed bill of materials with professional specifications.</p>
+          </div>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b-2 border-gray-200 bg-gray-50">
-                <th className="text-left py-3 px-2 font-semibold">Description</th>
-                <th className="text-left py-3 px-2 font-semibold">Model #</th>
-                <th className="text-center py-3 px-2 font-semibold">Qty</th>
-                <th className="text-center py-3 px-2 font-semibold">Length</th>
-                <th className="text-center py-3 px-2 font-semibold">Width</th>
-                <th className="text-left py-3 px-2 font-semibold">Color/Finish</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bomItems.map((item, index) => (
-                <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-3 px-2 font-medium">{item.description}</td>
-                  <td className="py-3 px-2 font-mono text-xs bg-gray-100 rounded">{item.modelNumber}</td>
-                  <td className="py-3 px-2 text-center font-semibold">{item.quantity}</td>
-                  <td className="py-3 px-2 text-center">{item.length}</td>
-                  <td className="py-3 px-2 text-center">{item.width}</td>
-                  <td className="py-3 px-2">
-                    <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-                      {item.colorFinish}
-                    </span>
-                  </td>
+        <div className="px-6 pb-6">
+          <div className="premium-table-container">
+            <table className="premium-table">
+              <thead>
+                <tr>
+                  <th>Component Description</th>
+                  <th>Model Number</th>
+                  <th className="text-center">Qty</th>
+                  <th className="text-center">Length</th>
+                  <th className="text-center">Width</th>
+                  <th>Finish</th>
+                  <th>Category</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {bomItems.map((item, index) => (
+                  <tr key={index}>
+                    <td className="font-semibold text-slate-800">{item.description}</td>
+                    <td className="premium-model-number">{item.modelNumber}</td>
+                    <td className="text-center font-bold text-slate-700">{item.quantity}</td>
+                    <td className="text-center text-slate-600">{item.length}</td>
+                    <td className="text-center text-slate-600">{item.width}</td>
+                    <td>
+                      <span className="premium-finish-badge">
+                        {item.colorFinish}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`premium-category-badge ${categoryColors[item.category] || 'bg-gray-100 text-gray-800'}`}>
+                        {item.category}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
   );
 };
 
-// Main App Component
+// Main Premium App Component
 function App() {
   const [shelfParams, setShelfParams] = useState({
     width: 0,
@@ -709,7 +809,6 @@ function App() {
   });
 
   const [sessionId] = useState(() => 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9));
-  const [showConfiguration, setShowConfiguration] = useState(true);
 
   const hasMinimumParams = shelfParams.width && shelfParams.length && shelfParams.postHeight && shelfParams.numberOfShelves;
 
@@ -718,21 +817,27 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      {/* Enhanced Header */}
-      <header className="bg-white shadow-lg border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-6">
+    <div className="premium-app">
+      {/* Premium Header */}
+      <header className="premium-app-header">
+        <div className="max-w-7xl mx-auto px-8 py-8">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Wire Shelves 3D Configurator</h1>
-              <p className="text-gray-600 mt-2">Design your perfect shelving solution with our AI assistant</p>
+            <div className="premium-brand">
+              <h1 className="premium-title">Wire Shelves 3D Configurator</h1>
+              <p className="premium-subtitle">Professional-grade shelving solutions with AI-powered design assistance</p>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+            <div className="premium-status-indicators">
+              <div className="premium-indicator-ai">
+                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
+                </svg>
                 AI Powered
               </div>
               {hasMinimumParams && (
-                <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                <div className="premium-indicator-ready">
+                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
                   3D Ready
                 </div>
               )}
@@ -741,10 +846,10 @@ function App() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
-          {/* Chat Interface */}
-          <div className="xl:col-span-4">
+      <div className="max-w-7xl mx-auto px-8 py-8">
+        <div className="premium-grid">
+          {/* AI Chat Interface */}
+          <div className="premium-grid-chat">
             <ChatInterface 
               onParametersExtracted={updateShelfParams}
               extractedParams={shelfParams}
@@ -753,29 +858,59 @@ function App() {
           </div>
 
           {/* 3D Viewer */}
-          <div className="xl:col-span-5">
+          <div className="premium-grid-viewer">
             {hasMinimumParams ? (
-              <div className="bg-white rounded-xl shadow-xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-gray-800">3D Preview</h3>
-                  <div className="flex space-x-2">
-                    <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">{shelfParams.shelfStyle}</span>
-                    <span className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">{shelfParams.color}</span>
+              <div className="premium-card">
+                <div className="premium-header p-6 pb-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-bold text-slate-800">3D Visualization</h3>
+                    <div className="premium-3d-badges">
+                      <span className="premium-style-badge">{shelfParams.shelfStyle}</span>
+                      <span className="premium-finish-badge">{shelfParams.color}</span>
+                    </div>
                   </div>
                 </div>
-                <WireShelf3D {...shelfParams} />
-                <div className="mt-4 text-center text-sm text-gray-500">
-                  <p>Interactive 3D model • Auto-rotating • Real-time updates</p>
+                <div className="px-6 pb-6">
+                  <WireShelf3D {...shelfParams} />
+                  <div className="premium-3d-footer">
+                    <p>Interactive 3D Model • Photorealistic Rendering • Real-time Updates</p>
+                  </div>
                 </div>
               </div>
             ) : (
-              <div className="bg-white rounded-xl shadow-xl p-6 h-[600px] flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <div className="text-8xl mb-6">🏗️</div>
-                  <h3 className="text-xl font-semibold mb-2">3D Model Preview</h3>
-                  <p className="text-lg mb-4">3D model will appear once you provide the basic dimensions</p>
-                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                    <p className="text-sm text-blue-700 font-medium">Required: Width, Length, Height, Number of Shelves</p>
+              <div className="premium-card premium-empty-3d">
+                <div className="premium-empty-state p-12">
+                  <div className="text-center">
+                    <div className="premium-empty-icon mb-6">
+                      <svg className="w-20 h-20 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M9 21l3-3 3 3M9 5l3-3 3 3" />
+                      </svg>
+                    </div>
+                    <h3 className="text-2xl font-bold text-slate-700 mb-3">3D Model Preview</h3>
+                    <p className="text-lg text-slate-500 mb-6">Your personalized wire shelving unit will appear here once you provide the essential dimensions</p>
+                    <div className="premium-requirements-card">
+                      <h4 className="font-bold text-slate-700 mb-2">Required Information:</h4>
+                      <div className="text-sm text-slate-600 space-y-1">
+                        <div className="flex items-center">
+                          <svg className="w-4 h-4 mr-2 text-slate-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                          Width & Length dimensions
+                        </div>
+                        <div className="flex items-center">
+                          <svg className="w-4 h-4 mr-2 text-slate-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                          Overall height specification
+                        </div>
+                        <div className="flex items-center">
+                          <svg className="w-4 h-4 mr-2 text-slate-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                          Number of shelf levels
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -783,7 +918,7 @@ function App() {
           </div>
 
           {/* Configuration Panel */}
-          <div className="xl:col-span-3">
+          <div className="premium-grid-controls">
             <ParameterControls 
               params={shelfParams}
               onParamsChange={updateShelfParams}
@@ -791,7 +926,7 @@ function App() {
           </div>
 
           {/* Bill of Materials */}
-          <div className="xl:col-span-12">
+          <div className="premium-grid-bom">
             <BillOfMaterials params={shelfParams} />
           </div>
         </div>
