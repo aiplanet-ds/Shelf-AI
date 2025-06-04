@@ -117,21 +117,37 @@ body {
   animation: premium-pulse 2s infinite;
 }
 
-/* Premium Grid Layout */
+/* Premium Grid Layout - Full Screen Utilization */
 .premium-grid {
   display: grid;
-  grid-template-columns: 1fr 1.5fr 1fr;
+  grid-template-columns: 400px 1fr 380px;
   grid-template-rows: auto auto;
-  grid-gap: 2rem;
+  grid-gap: 2.5rem;
   grid-template-areas: 
     "chat viewer controls"
     "bom bom bom";
+  min-height: 80vh;
 }
 
-.premium-grid-chat { grid-area: chat; }
-.premium-grid-viewer { grid-area: viewer; }
-.premium-grid-controls { grid-area: controls; }
-.premium-grid-bom { grid-area: bom; }
+.premium-grid-chat { 
+  grid-area: chat;
+  min-width: 400px;
+}
+
+.premium-grid-viewer { 
+  grid-area: viewer;
+  min-width: 600px;
+}
+
+.premium-grid-controls { 
+  grid-area: controls;
+  min-width: 380px;
+}
+
+.premium-grid-bom { 
+  grid-area: bom;
+  margin-top: 1rem;
+}
 
 /* Premium Card System */
 .premium-card {
