@@ -187,12 +187,12 @@ body {
   padding: 2rem;
 }
 
-/* Premium Chat Interface */
+/* Premium Chat Interface - Larger Avatar and Spacing */
 .premium-avatar {
-  width: 3rem;
-  height: 3rem;
+  width: 4rem;
+  height: 4rem;
   background: var(--gradient-accent);
-  border-radius: 1rem;
+  border-radius: 1.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -203,35 +203,35 @@ body {
 .premium-status-badge {
   display: flex;
   align-items: center;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1.25rem;
   background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
   border: 1px solid #bbf7d0;
-  border-radius: 0.75rem;
-  font-size: 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: #059669;
 }
 
 .status-dot {
-  width: 0.5rem;
-  height: 0.5rem;
+  width: 0.625rem;
+  height: 0.625rem;
   background: #10b981;
   border-radius: 50%;
-  margin-right: 0.5rem;
+  margin-right: 0.75rem;
 }
 
 .premium-scrollbar::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 .premium-scrollbar::-webkit-scrollbar-track {
   background: var(--premium-surface-muted);
-  border-radius: 3px;
+  border-radius: 4px;
 }
 
 .premium-scrollbar::-webkit-scrollbar-thumb {
   background: var(--premium-text-muted);
-  border-radius: 3px;
+  border-radius: 4px;
   opacity: 0.5;
 }
 
@@ -242,12 +242,16 @@ body {
 .premium-user-message {
   background: var(--gradient-accent);
   box-shadow: var(--shadow-medium);
+  font-size: 1rem;
+  padding: 1.25rem 1.5rem;
 }
 
 .premium-ai-message {
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   border: 1px solid var(--premium-border);
   box-shadow: var(--shadow-soft);
+  font-size: 1rem;
+  padding: 1.25rem 1.5rem;
 }
 
 .premium-loading-dot {
