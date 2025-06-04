@@ -349,7 +349,7 @@ body {
 .premium-toggle-container {
   display: flex;
   align-items: center;
-  justify-between;
+  justify-content: space-between;
   padding: 1rem 1.5rem;
   background: var(--premium-surface);
   border: 1px solid var(--premium-border);
