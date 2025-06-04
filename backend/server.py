@@ -76,6 +76,30 @@ WIRE SHELF CONFIGURATION SCHEMA:
       "description": "Whether posts are stationary or mobile",
       "required": false
     }
+  },
+  "accessories": {
+    "shelf_dividers": {
+      "number_of_dividers": {
+        "value": null,
+        "type": "integer",
+        "description": "Number of dividers per shelf (creates sections)",
+        "required": false
+      },
+      "shelves_to_apply_this_to": {
+        "value": null,
+        "type": "array",
+        "description": "Which shelf levels to add dividers to (e.g., [1, 2, 3] for top 3 shelves)",
+        "required": false
+      }
+    },
+    "enclosure_panels": {
+      "enclosure_type": {
+        "value": null,
+        "options": ["none", "top", "sides"],
+        "description": "Type of enclosure panels - 'top' adds panel at top, 'sides' adds panels to three sides",
+        "required": false
+      }
+    }
   }
 }
 
@@ -99,7 +123,10 @@ Your response should ALWAYS end with a JSON object in this exact format:
     "shelf_style": value_or_null,
     "solid_bottom_shelf": boolean_or_null,
     "color_and_finish": value_or_null,
-    "type_of_posts": value_or_null
+    "type_of_posts": value_or_null,
+    "shelf_dividers_count": value_or_null,
+    "shelf_dividers_shelves": array_or_null,
+    "enclosure_type": value_or_null
   },
   "has_sufficient_entities": boolean,
   "next_questions": [array_of_follow_up_questions]
@@ -188,7 +215,10 @@ async def chat_with_ai(chat_request: ChatMessage):
                 "shelf_style": None,
                 "solid_bottom_shelf": None,
                 "color_and_finish": None,
-                "type_of_posts": None
+                "type_of_posts": None,
+                "shelf_dividers_count": None,
+                "shelf_dividers_shelves": None,
+                "enclosure_type": None
             }
 
         # Prepare conversation history for Cerebras
@@ -275,6 +305,12 @@ def parse_ai_response(response: str, session_id: str) -> tuple[Dict[str, Any], b
                 formatted_entities["color"] = extracted_entities["color_and_finish"]
             if extracted_entities.get("type_of_posts"):
                 formatted_entities["postType"] = extracted_entities["type_of_posts"]
+            if extracted_entities.get("shelf_dividers_count"):
+                formatted_entities["shelfDividersCount"] = extracted_entities["shelf_dividers_count"]
+            if extracted_entities.get("shelf_dividers_shelves"):
+                formatted_entities["shelfDividersShelves"] = extracted_entities["shelf_dividers_shelves"]
+            if extracted_entities.get("enclosure_type"):
+                formatted_entities["enclosureType"] = extracted_entities["enclosure_type"]
 
             return formatted_entities, has_sufficient, next_questions
         except json.JSONDecodeError:

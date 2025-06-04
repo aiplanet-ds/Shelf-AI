@@ -7,7 +7,7 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 // Enhanced Wire Shelf 3D Component with premium materials
-const WireShelf3D = ({ width, length, postHeight, numberOfShelves, color, shelfStyle, solidBottomShelf, postType }) => {
+const WireShelf3D = ({ width, length, postHeight, numberOfShelves, color, shelfStyle, solidBottomShelf, postType, shelfDividersCount, shelfDividersShelves, enclosureType }) => {
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
   const rendererRef = useRef(null);
@@ -228,13 +228,157 @@ const WireShelf3D = ({ width, length, postHeight, numberOfShelves, color, shelfS
       }
     }
 
-    // Premium frame supports
+    // Premium Shelf Dividers
+    if (shelfDividersCount > 0 && shelfDividersShelves && shelfDividersShelves.length > 0) {
+      const dividerHeight = 4; // Height of dividers in inches
+      const dividerThickness = 0.1;
+      const dividerSpacing = width / (shelfDividersCount + 1);
+
+      // Create divider material
+      const dividerMaterial = new THREE.MeshPhysicalMaterial({
+        color: getColorHex(color),
+        metalness: 0.8,
+        roughness: 0.3,
+        clearcoat: 0.1,
+        reflectivity: 0.85
+      });
+
+      shelfDividersShelves.forEach(shelfIndex => {
+        if (shelfIndex >= 1 && shelfIndex <= numberOfShelves) {
+          const shelfY = shelfIndex * shelfSpacing;
+
+          // Create vertical dividers
+          for (let d = 1; d <= shelfDividersCount; d++) {
+            const dividerX = -width/2 + (d * dividerSpacing);
+
+            // Main vertical divider panel
+            const dividerGeometry = new THREE.BoxGeometry(dividerThickness, dividerHeight, length * 0.9);
+            const divider = new THREE.Mesh(dividerGeometry, dividerMaterial);
+            divider.position.set(dividerX, shelfY + dividerHeight/2, 0);
+            divider.castShadow = true;
+            divider.receiveShadow = true;
+
+            // Wire grid pattern on divider (for aesthetic)
+            const wireCount = Math.floor(dividerHeight / 0.8);
+            for (let w = 0; w < wireCount; w++) {
+              const wireY = shelfY + (w + 1) * (dividerHeight / (wireCount + 1));
+              const wireGeometry = new THREE.CylinderGeometry(0.03, 0.03, length * 0.8, 8);
+              const wire = new THREE.Mesh(wireGeometry, materials.wire);
+              wire.rotation.x = Math.PI / 2;
+              wire.position.set(dividerX, wireY, 0);
+              wire.castShadow = true;
+              shelfGroup.add(wire);
+            }
+
+            shelfGroup.add(divider);
+          }
+        }
+      });
+    }
+
+    // Premium Enclosure Panels
+    if (enclosureType && enclosureType !== 'none') {
+      const panelThickness = 0.25;
+      const panelMaterial = new THREE.MeshPhysicalMaterial({
+        color: getColorHex(color),
+        metalness: 0.7,
+        roughness: 0.4,
+        clearcoat: 0.05,
+        reflectivity: 0.8,
+        transparent: true,
+        opacity: 0.9
+      });
+
+      if (enclosureType === 'top') {
+        // Top panel
+        const topPanelGeometry = new THREE.BoxGeometry(width + 1, panelThickness, length + 1);
+        const topPanel = new THREE.Mesh(topPanelGeometry, panelMaterial);
+        topPanel.position.set(0, postHeight + panelThickness/2, 0);
+        topPanel.castShadow = true;
+        topPanel.receiveShadow = true;
+        shelfGroup.add(topPanel);
+
+        // Top panel frame reinforcement
+        const frameThickness = 0.15;
+        const frameGeometry = new THREE.BoxGeometry(width + 1.2, frameThickness, frameThickness);
+
+        // Front and back frame
+        const frontFrame = new THREE.Mesh(frameGeometry, materials.wire);
+        frontFrame.position.set(0, postHeight + panelThickness + frameThickness/2, (length + 1)/2);
+        const backFrame = new THREE.Mesh(frameGeometry, materials.wire);
+        backFrame.position.set(0, postHeight + panelThickness + frameThickness/2, -(length + 1)/2);
+
+        // Left and right frame
+        const sideFrameGeometry = new THREE.BoxGeometry(frameThickness, frameThickness, length + 1.2);
+        const leftFrame = new THREE.Mesh(sideFrameGeometry, materials.wire);
+        leftFrame.position.set(-(width + 1)/2, postHeight + panelThickness + frameThickness/2, 0);
+        const rightFrame = new THREE.Mesh(sideFrameGeometry, materials.wire);
+        rightFrame.position.set((width + 1)/2, postHeight + panelThickness + frameThickness/2, 0);
+
+        shelfGroup.add(frontFrame, backFrame, leftFrame, rightFrame);
+      }
+
+      if (enclosureType === 'sides') {
+        // Back panel
+        const backPanelGeometry = new THREE.BoxGeometry(width + 1, postHeight, panelThickness);
+        const backPanel = new THREE.Mesh(backPanelGeometry, panelMaterial);
+        backPanel.position.set(0, postHeight/2, -(length + 1)/2);
+        backPanel.castShadow = true;
+        backPanel.receiveShadow = true;
+        shelfGroup.add(backPanel);
+
+        // Left side panel
+        const leftPanelGeometry = new THREE.BoxGeometry(panelThickness, postHeight, length + 1);
+        const leftPanel = new THREE.Mesh(leftPanelGeometry, panelMaterial);
+        leftPanel.position.set(-(width + 1)/2, postHeight/2, 0);
+        leftPanel.castShadow = true;
+        leftPanel.receiveShadow = true;
+        shelfGroup.add(leftPanel);
+
+        // Right side panel
+        const rightPanel = new THREE.Mesh(leftPanelGeometry, panelMaterial);
+        rightPanel.position.set((width + 1)/2, postHeight/2, 0);
+        rightPanel.castShadow = true;
+        rightPanel.receiveShadow = true;
+        shelfGroup.add(rightPanel);
+
+        // Panel reinforcement frames
+        const frameThickness = 0.12;
+
+        // Back panel frame
+        const backFrameGeometry = new THREE.BoxGeometry(width + 1.2, frameThickness, frameThickness);
+        const backTopFrame = new THREE.Mesh(backFrameGeometry, materials.wire);
+        backTopFrame.position.set(0, postHeight - frameThickness/2, -(length + 1)/2);
+        const backBottomFrame = new THREE.Mesh(backFrameGeometry, materials.wire);
+        backBottomFrame.position.set(0, frameThickness/2, -(length + 1)/2);
+        shelfGroup.add(backTopFrame, backBottomFrame);
+
+        // Side panel frames
+        const sideFrameGeometry = new THREE.BoxGeometry(frameThickness, frameThickness, length + 1.2);
+        const leftTopFrame = new THREE.Mesh(sideFrameGeometry, materials.wire);
+        leftTopFrame.position.set(-(width + 1)/2, postHeight - frameThickness/2, 0);
+        const leftBottomFrame = new THREE.Mesh(sideFrameGeometry, materials.wire);
+        leftBottomFrame.position.set(-(width + 1)/2, frameThickness/2, 0);
+
+        const rightTopFrame = new THREE.Mesh(sideFrameGeometry, materials.wire);
+        rightTopFrame.position.set((width + 1)/2, postHeight - frameThickness/2, 0);
+        const rightBottomFrame = new THREE.Mesh(sideFrameGeometry, materials.wire);
+        rightBottomFrame.position.set((width + 1)/2, frameThickness/2, 0);
+
+        shelfGroup.add(leftTopFrame, leftBottomFrame, rightTopFrame, rightBottomFrame);
+      }
+    }
+
+    // Premium frame supports (positioned between shelves, not extending beyond)
     const frameThickness = 0.18;
     const frameGeometry = new THREE.CylinderGeometry(frameThickness, frameThickness, width, 16);
     const supportLevels = numberOfShelves > 4 ? 3 : 2;
-    
+
     for (let level = 1; level <= supportLevels; level++) {
-      const frameY = (postHeight / (supportLevels + 1)) * level;
+      // Position frames between shelves, not extending beyond the top shelf
+      const maxFrameHeight = postHeight - (postHeight / (numberOfShelves + 1));
+      const frameY = (maxFrameHeight / supportLevels) * level;
+
       const frames = [
         { pos: [0, frameY, -length/2], rot: [0, 0, Math.PI/2] },
         { pos: [0, frameY, length/2], rot: [0, 0, Math.PI/2] }
@@ -321,7 +465,7 @@ const WireShelf3D = ({ width, length, postHeight, numberOfShelves, color, shelfS
       }
       renderer.dispose();
     };
-  }, [width, length, postHeight, numberOfShelves, color, shelfStyle, solidBottomShelf, postType]);
+  }, [width, length, postHeight, numberOfShelves, color, shelfStyle, solidBottomShelf, postType, shelfDividersCount, shelfDividersShelves, enclosureType]);
 
   return (
     <div className="premium-3d-container">
@@ -398,36 +542,36 @@ const ChatInterface = ({ onParametersExtracted, extractedParams, sessionId }) =>
   };
 
   return (
-    <div className="premium-card h-[800px] flex flex-col">
+    <div className="premium-card h-[820px] flex flex-col">
       <div className="premium-header">
         <div className="flex items-center">
-          <div className="premium-avatar mr-6">
-            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+          <div className="premium-avatar mr-3">
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 2C5.58 2 2 5.58 2 10s3.58 8 8 8c1.86 0 3.58-.63 4.95-1.69L17.71 18.1c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41l-1.79-1.79C18.37 13.58 19 11.86 19 10c0-4.42-3.58-8-8-8zm0 2c3.32 0 6 2.68 6 6s-2.68 6-6 6-6-2.68-6-6 2.68-6 6-6z" clipRule="evenodd" />
             </svg>
           </div>
           <div className="flex-1">
-            <h3 className="text-2xl font-bold text-white mb-1">Wire Shelf Designer</h3>
-            <p className="text-gray-300 font-medium text-lg">Professional AI Assistant</p>
+            <h3 className="text-lg font-bold text-white mb-0">Wire Shelf Designer</h3>
+            <p className="text-gray-300 font-medium text-sm">Professional AI Assistant</p>
           </div>
           <div className="ml-auto">
             <div className="premium-status-badge">
               <div className="status-dot animate-pulse"></div>
-              <span className="text-base font-semibold">Online</span>
+              <span className="text-sm font-semibold">Online</span>
             </div>
           </div>
         </div>
       </div>
-      
-      <div className="flex-1 overflow-y-auto px-8 pb-6 space-y-6 premium-scrollbar">
+
+      <div className="flex-1 overflow-y-auto px-4 pb-3 space-y-3 premium-scrollbar">
         {messages.map((message, index) => (
           <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[80%] font-medium ${
+            <div className={`max-w-[85%] font-medium ${
               message.type === 'user'
-                ? 'premium-user-message text-white ml-8'
-                : 'premium-ai-message text-gray-200 mr-8'
+                ? 'premium-user-message text-white ml-4'
+                : 'premium-ai-message text-gray-200 mr-4'
             }`}>
-              <p className="leading-relaxed text-base">{message.content}</p>
+              <p className="leading-relaxed text-sm">{message.content}</p>
             </div>
           </div>
         ))}
@@ -445,7 +589,7 @@ const ChatInterface = ({ onParametersExtracted, extractedParams, sessionId }) =>
       </div>
       
       <div className="premium-input-container">
-        <div className="flex space-x-6">
+        <div className="flex space-x-3">
           <input
             type="text"
             value={input}
@@ -460,7 +604,7 @@ const ChatInterface = ({ onParametersExtracted, extractedParams, sessionId }) =>
             disabled={isLoading || !input.trim()}
             className="premium-send-button"
           >
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
               <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
             </svg>
           </button>
@@ -479,13 +623,13 @@ const ParameterControls = ({ params, onParamsChange }) => {
   const hasRequiredParams = params.width && params.length && params.postHeight && params.numberOfShelves;
 
   return (
-    <div className="premium-card space-y-6">
-      <div className="premium-header p-6 pb-4">
+    <div className="premium-card space-y-3">
+      <div className="premium-header p-3 pb-2">
         <div className="flex items-center justify-between">
-          <h3 className="text-xl font-bold text-white">Configuration Panel</h3>
+          <h3 className="text-lg font-bold text-white">Configuration Panel</h3>
           {hasRequiredParams && (
             <div className="premium-ready-badge">
-              <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
               Ready to Build
@@ -493,12 +637,12 @@ const ParameterControls = ({ params, onParamsChange }) => {
           )}
         </div>
       </div>
-      
-      <div className="px-6 pb-6 space-y-6">
+
+      <div className="px-3 pb-3 space-y-3">
         {/* Required Parameters */}
         <div className="premium-section-required">
-          <h4 className="premium-section-title mb-4">Essential Dimensions</h4>
-          <div className="space-y-4">
+          <h4 className="premium-section-title mb-2">Essential Dimensions</h4>
+          <div className="space-y-2">
             <div className="premium-input-group">
               <label className="premium-label">Width (inches)</label>
               <input
@@ -551,8 +695,8 @@ const ParameterControls = ({ params, onParamsChange }) => {
 
         {/* Optional Parameters */}
         <div className="premium-section-optional">
-          <h4 className="premium-section-title mb-4">Style & Finish Options</h4>
-          <div className="space-y-4">
+          <h4 className="premium-section-title mb-2">Style & Finish Options</h4>
+          <div className="space-y-2">
             <div className="premium-input-group">
               <label className="premium-label">Color & Finish</label>
               <select
@@ -607,6 +751,58 @@ const ParameterControls = ({ params, onParamsChange }) => {
               >
                 <option value="Stationary">Stationary</option>
                 <option value="Mobile">Mobile (with premium casters)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Accessories Section */}
+        <div className="premium-section-optional">
+          <h4 className="premium-section-title mb-2">Accessories</h4>
+          <div className="space-y-2">
+            <div className="premium-input-group">
+              <label className="premium-label">Shelf Dividers</label>
+              <p className="premium-sublabel">Add vertical dividers to create organized sections</p>
+              <div className="grid grid-cols-2 gap-4 mt-2">
+                <div>
+                  <label className="text-sm font-medium text-gray-300 mb-1 block">Number of Dividers per Shelf</label>
+                  <input
+                    type="number"
+                    value={params.shelfDividersCount || ''}
+                    onChange={(e) => updateParam('shelfDividersCount', parseInt(e.target.value) || 0)}
+                    className="premium-number-input"
+                    min="0" max="6"
+                    placeholder="0"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-300 mb-1 block">Apply to Shelves</label>
+                  <input
+                    type="text"
+                    value={params.shelfDividersShelves ? params.shelfDividersShelves.join(', ') : ''}
+                    onChange={(e) => {
+                      const shelves = e.target.value.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+                      updateParam('shelfDividersShelves', shelves);
+                    }}
+                    className="premium-number-input"
+                    placeholder="1, 2, 3"
+                  />
+                  <p className="text-xs text-gray-400 mt-1">Enter shelf numbers separated by commas (e.g., 1, 2, 3)</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="premium-input-group">
+              <label className="premium-label">Enclosure Panels</label>
+              <p className="premium-sublabel">Add protective panels for security and weather protection</p>
+              <select
+                value={params.enclosureType || 'none'}
+                onChange={(e) => updateParam('enclosureType', e.target.value)}
+                className="premium-select"
+              >
+                <option value="none">No Enclosure</option>
+                <option value="top">Top Panel Only</option>
+                <option value="sides">Three Side Panels (Back + Left + Right)</option>
               </select>
             </div>
           </div>
@@ -702,6 +898,59 @@ const BillOfMaterials = ({ params }) => {
       });
     }
 
+    // Shelf Dividers if specified
+    if (params.shelfDividersCount > 0 && params.shelfDividersShelves && params.shelfDividersShelves.length > 0) {
+      const totalDividers = params.shelfDividersCount * params.shelfDividersShelves.length;
+      items.push({
+        description: `Wire Shelf Dividers - 4" Height (Creates ${params.shelfDividersCount + 1} sections per shelf)`,
+        modelNumber: `WSD-4H-${params.width}-${params.color?.replace(/\s+/g, '') || 'Chrome'}`,
+        quantity: totalDividers,
+        length: '4"',
+        width: `${Math.round(params.length * 0.9)}"`,
+        colorFinish: params.color || 'Chrome',
+        category: 'Accessories'
+      });
+    }
+
+    // Enclosure Panels if specified
+    if (params.enclosureType && params.enclosureType !== 'none') {
+      if (params.enclosureType === 'top') {
+        items.push({
+          description: `Top Enclosure Panel - Weather Protection Cover`,
+          modelNumber: `TEP-${params.width}x${params.length}-${params.color?.replace(/\s+/g, '') || 'Chrome'}`,
+          quantity: 1,
+          length: `${params.length + 1}"`,
+          width: `${params.width + 1}"`,
+          colorFinish: params.color || 'Chrome',
+          category: 'Accessories'
+        });
+      }
+
+      if (params.enclosureType === 'sides') {
+        // Back panel
+        items.push({
+          description: `Back Enclosure Panel - Security & Protection`,
+          modelNumber: `BEP-${params.width}x${params.postHeight}-${params.color?.replace(/\s+/g, '') || 'Chrome'}`,
+          quantity: 1,
+          length: `${params.postHeight}"`,
+          width: `${params.width + 1}"`,
+          colorFinish: params.color || 'Chrome',
+          category: 'Accessories'
+        });
+
+        // Side panels (left and right)
+        items.push({
+          description: `Side Enclosure Panels - Security & Protection (Left & Right)`,
+          modelNumber: `SEP-${params.length}x${params.postHeight}-${params.color?.replace(/\s+/g, '') || 'Chrome'}`,
+          quantity: 2,
+          length: `${params.postHeight}"`,
+          width: `${params.length + 1}"`,
+          colorFinish: params.color || 'Chrome',
+          category: 'Accessories'
+        });
+      }
+    }
+
     return items;
   };
 
@@ -713,16 +962,17 @@ const BillOfMaterials = ({ params }) => {
     'Structure': 'bg-gray-700 text-gray-200',
     'Shelving': 'bg-blue-900 text-blue-200',
     'Hardware': 'bg-amber-900 text-amber-200',
-    'Mobility': 'bg-green-900 text-green-200'
+    'Mobility': 'bg-green-900 text-green-200',
+    'Accessories': 'bg-purple-900 text-purple-200'
   };
 
   return (
     <div className="premium-card">
-      <div className="premium-header p-6 pb-4">
+      <div className="premium-header p-3 pb-2">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-2xl font-bold text-white">Bill of Materials</h3>
-            <p className="text-gray-300 font-medium mt-1">Professional specification sheet</p>
+            <h3 className="text-lg font-bold text-white">Bill of Materials</h3>
+            <p className="text-gray-300 font-medium text-sm mt-0">Professional specification sheet</p>
           </div>
           {bomItems.length > 0 && (
             <div className="text-right">
@@ -740,19 +990,19 @@ const BillOfMaterials = ({ params }) => {
       </div>
       
       {bomItems.length === 0 ? (
-        <div className="premium-empty-state p-12">
+        <div className="premium-empty-state p-6">
           <div className="text-center">
-            <div className="premium-empty-icon mb-6">
-              <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="premium-empty-icon mb-3">
+              <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <h4 className="text-xl font-bold text-white mb-2">Ready to Generate BOM</h4>
-            <p className="text-gray-300 max-w-md mx-auto">Complete your configuration using our AI assistant to generate a detailed bill of materials with professional specifications.</p>
+            <h4 className="text-lg font-bold text-white mb-2">Ready to Generate BOM</h4>
+            <p className="text-gray-300 max-w-md mx-auto text-sm">Complete your configuration using our AI assistant to generate a detailed bill of materials with professional specifications.</p>
           </div>
         </div>
       ) : (
-        <div className="px-6 pb-6">
+        <div className="px-3 pb-3">
           <div className="premium-table-container">
             <table className="premium-table">
               <thead>
@@ -805,7 +1055,10 @@ function App() {
     color: 'Chrome',
     shelfStyle: 'Industrial Grid',
     solidBottomShelf: false,
-    postType: 'Stationary'
+    postType: 'Stationary',
+    shelfDividersCount: 0,
+    shelfDividersShelves: [],
+    enclosureType: 'none'
   });
 
   const [sessionId] = useState(() => 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9));
@@ -878,7 +1131,7 @@ function App() {
                 </div>
               </div>
             ) : (
-              <div className="premium-card premium-empty-3d">
+              <div className="premium-card h-[820px] premium-empty-3d">
                 <div className="premium-empty-state p-12">
                   <div className="text-center">
                     <div className="premium-empty-icon mb-6">
