@@ -5,46 +5,142 @@ from typing import List, Dict, Any, Optional
 import json
 import re
 import uuid
-# Mock implementation for emergentintegrations
-class UserMessage:
-    def __init__(self, text):
-        self.text = text
-
-class LlmChat:
-    def __init__(self, api_key, session_id, system_message):
-        self.api_key = api_key
-        self.session_id = session_id
-        self.system_message = system_message
-        self.model = None
-
-    def with_model(self, provider, model_name):
-        self.model = f"{provider}:{model_name}"
-        return self
-
-    async def send_message(self, user_message):
-        # Mock AI response for testing
-        return f"""Thank you for your message: "{user_message.text}"
-
-I'm here to help you design the perfect wire shelving unit! To create your 3D model, I need to know:
-
-1. Width (how wide should it be?)
-2. Length/Depth (how deep should it be?)
-3. Height (how tall should it be?)
-4. Number of shelves (how many shelf levels?)
-
-Could you tell me about your storage needs and the space you're working with?
-
-ENTITIES_EXTRACTED: {{"message_received": true}}
-SUFFICIENT: false"""
-
+import os
+from cerebras.cloud.sdk import Cerebras
+from dotenv import load_dotenv
 import asyncio
+
+# Load environment variables
+load_dotenv()
+
+# Initialize Cerebras client
+cerebras_client = Cerebras(
+    api_key=os.environ.get("CEREBRAS_API_KEY")
+)
+
+# System prompt for the AI agent
+SYSTEM_PROMPT = """You are a professional wire shelf designer assistant working for a premium shelving company. Your role is to engage customers in natural, friendly conversation to understand their wire shelf requirements and extract key entities needed for design.
+
+You should behave like an experienced designer talking to a customer, asking clarifying questions and providing helpful suggestions. Always maintain a professional yet approachable tone.
+
+WIRE SHELF CONFIGURATION SCHEMA:
+{
+  "size_and_capacity": {
+    "width": {
+      "value": null,
+      "unit": "inches",
+      "description": "Width of the shelf unit",
+      "required": true
+    },
+    "length": {
+      "value": null,
+      "unit": "inches",
+      "description": "Depth/Length of the shelf unit",
+      "required": true
+    },
+    "post_height": {
+      "value": null,
+      "unit": "inches",
+      "description": "Height of the posts (related to number of shelves)",
+      "required": true
+    },
+    "number_of_shelves": {
+      "value": null,
+      "unit": "count",
+      "description": "Number of shelf levels (related to post height)",
+      "required": true
+    }
+  },
+  "styles_and_finishes": {
+    "shelf_style": {
+      "value": null,
+      "options": ["Industrial Grid", "Commercial Wire", "Heavy Duty Mesh", "Ventilated Wire", "Open Grid Pro"],
+      "description": "Style of the wire shelving",
+      "required": false
+    },
+    "solid_bottom_shelf": {
+      "value": false,
+      "type": "boolean",
+      "description": "Whether to include a solid bottom shelf",
+      "required": false
+    },
+    "color_and_finish": {
+      "value": null,
+      "options": ["Chrome", "Stainless Steel", "Black Epoxy", "White Epoxy", "Zinc Plated"],
+      "description": "Color and finish of the shelving",
+      "required": false
+    },
+    "type_of_posts": {
+      "value": null,
+      "options": ["Stationary", "Mobile"],
+      "description": "Whether posts are stationary or mobile",
+      "required": false
+    }
+  }
+}
+
+IMPORTANT RULES:
+1. The "size_and_capacity" entities (width, length, post_height, number_of_shelves) are ESSENTIAL. The 3D model can only be built when ALL 4 essential entities are collected.
+2. The "styles_and_finishes" entities are OPTIONAL and can be configured later.
+3. Always ask clarifying questions naturally, like a designer would.
+4. If a user provides partial information, acknowledge what they've given and ask for the missing essential details.
+5. Provide helpful suggestions based on common use cases (garage storage, pantry, office, etc.).
+6. ALWAYS respond with your natural conversation followed by a JSON object.
+
+RESPONSE FORMAT:
+Your response should ALWAYS end with a JSON object in this exact format:
+```json
+{
+  "extracted_entities": {
+    "width": value_or_null,
+    "length": value_or_null,
+    "post_height": value_or_null,
+    "number_of_shelves": value_or_null,
+    "shelf_style": value_or_null,
+    "solid_bottom_shelf": boolean_or_null,
+    "color_and_finish": value_or_null,
+    "type_of_posts": value_or_null
+  },
+  "has_sufficient_entities": boolean,
+  "next_questions": [array_of_follow_up_questions]
+}
+```
+
+Example conversation:
+User: "I need a shelf for my garage"
+Assistant: "Great! A garage shelf is a popular choice. To design the perfect shelving unit for your garage, I'll need to understand your space and storage needs.
+
+Could you tell me:
+- How wide should the shelf be? (in inches)
+- How deep do you need it? (in inches)
+- How tall should it be?
+- How many shelf levels would work best for your storage?
+
+What are you planning to store on it? That can help me recommend the right dimensions and style."
+
+```json
+{
+  "extracted_entities": {
+    "width": null,
+    "length": null,
+    "post_height": null,
+    "number_of_shelves": null,
+    "shelf_style": null,
+    "solid_bottom_shelf": null,
+    "color_and_finish": null,
+    "type_of_posts": null
+  },
+  "has_sufficient_entities": false,
+  "next_questions": ["What width do you need?", "How deep should it be?", "What height works for your space?", "How many shelf levels do you want?"]
+}
+```"""
 
 app = FastAPI()
 
 # Allow CORS for React frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -78,133 +174,138 @@ async def chat_with_ai(chat_request: ChatMessage):
         session_id = chat_request.session_id
         user_message = chat_request.message
         
-        # Initialize chat session if not exists
-        if session_id not in chat_sessions:
-            system_message = """You are a professional wire shelf designer assistant. Your role is to engage customers in natural conversation to understand their wire shelf requirements and extract key entities needed for design.
-
-Key entities to extract (mark as EXTRACTED when found):
-- Width: shelf width in inches (REQUIRED for 3D model)
-- Length: shelf depth/length in inches (REQUIRED for 3D model) 
-- PostHeight: overall height in inches (REQUIRED for 3D model)
-- NumberOfShelves: how many shelf levels (REQUIRED for 3D model)
-- Color: finish color (Chrome, Black, White, Stainless Steel, Bronze)
-- ShelfStyle: style name (Industrial Grid, Metro Classic, Commercial Pro, Heavy Duty)
-- SolidBottomShelf: boolean for solid bottom shelf
-- PostType: Stationary or Mobile
-
-CONVERSATION FLOW:
-1. Start with friendly greeting and ask about storage needs
-2. Extract the 4 REQUIRED entities: Width, Length, PostHeight, NumberOfShelves
-3. Only when all 4 are collected, mention "I have enough information to create your 3D model"
-4. Then gather optional details: Color, ShelfStyle, SolidBottomShelf, PostType
-5. Be conversational like a designer talking to a customer
-6. Ask clarifying questions naturally
-7. Extract numbers and dimensions from natural language
-
-RESPONSE FORMAT:
-Always end your response with:
-ENTITIES_EXTRACTED: {json object with extracted entities}
-SUFFICIENT: {true/false if all 4 required entities collected}"""
-
-            chat_sessions[session_id] = LlmChat(
-                api_key="AIzaSyAO9cDR-FTZIlWgLIRPEycp0JkpuOLGIQI",
-                session_id=session_id,
-                system_message=system_message
-            ).with_model("gemini", "gemini-2.0-flash")
-            
+        # Initialize chat history if not exists
+        if session_id not in chat_histories:
             chat_histories[session_id] = []
 
-        # Get chat instance
-        chat = chat_sessions[session_id]
-        
-        # Send message to AI
-        user_msg = UserMessage(text=user_message)
-        ai_response = await chat.send_message(user_msg)
+        # Get or initialize session entities
+        if session_id not in chat_sessions:
+            chat_sessions[session_id] = {
+                "width": None,
+                "length": None,
+                "post_height": None,
+                "number_of_shelves": None,
+                "shelf_style": None,
+                "solid_bottom_shelf": None,
+                "color_and_finish": None,
+                "type_of_posts": None
+            }
+
+        # Prepare conversation history for Cerebras
+        messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+
+        # Add previous conversation history
+        for msg in chat_histories[session_id]:
+            if msg["type"] == "user":
+                messages.append({"role": "user", "content": msg["content"]})
+            else:
+                # Only add the conversational part, not the JSON
+                clean_content = clean_ai_response(msg["content"])
+                messages.append({"role": "assistant", "content": clean_content})
+
+        # Add current user message
+        messages.append({"role": "user", "content": user_message})
+
+        # Call Cerebras API
+        completion_response = cerebras_client.chat.completions.create(
+            messages=messages,
+            model="llama-4-scout-17b-16e-instruct",
+            stream=False,
+            max_completion_tokens=4916,
+            temperature=0,
+            top_p=0.5
+        )
+
+        ai_response = completion_response.choices[0].message.content
         
         # Store message history
         chat_histories[session_id].append({"type": "user", "content": user_message})
         chat_histories[session_id].append({"type": "ai", "content": ai_response})
-        
+
         # Extract entities and sufficient status from AI response
-        extracted_entities = extract_entities_from_response(ai_response, session_id)
-        has_sufficient = check_sufficient_entities(extracted_entities)
-        
-        # Clean the response (remove the ENTITIES_EXTRACTED part)
+        extracted_entities, has_sufficient, next_questions = parse_ai_response(ai_response, session_id)
+
+        # Update session entities
+        chat_sessions[session_id].update(extracted_entities)
+
+        # Clean the response (remove the JSON part)
         clean_response = clean_ai_response(ai_response)
-        
+
         return ChatResponse(
             response=clean_response,
             extracted_entities=extracted_entities,
             has_sufficient_entities=has_sufficient,
-            next_questions=generate_next_questions(extracted_entities, has_sufficient)
+            next_questions=next_questions
         )
         
     except Exception as e:
         print(f"Error in chat: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Chat error: {str(e)}")
 
-def extract_entities_from_response(response: str, session_id: str) -> Dict[str, Any]:
-    """Extract entities from AI response and maintain session state"""
-    # Get existing entities for this session
-    existing_entities = getattr(extract_entities_from_response, f'entities_{session_id}', {})
-    
-    # Try to extract from the structured response
-    entities_match = re.search(r'ENTITIES_EXTRACTED:\s*(\{.*\})', response, re.IGNORECASE | re.DOTALL)
-    if entities_match:
+def parse_ai_response(response: str, session_id: str) -> tuple[Dict[str, Any], bool, List[str]]:
+    """Parse AI response to extract JSON data"""
+    # Try to extract JSON from the response
+    json_match = re.search(r'```json\s*(\{.*?\})\s*```', response, re.DOTALL)
+    if not json_match:
+        # Fallback: look for JSON without code blocks
+        json_match = re.search(r'(\{[^{}]*"extracted_entities"[^{}]*\})', response, re.DOTALL)
+
+    if json_match:
         try:
-            new_entities = json.loads(entities_match.group(1))
-            existing_entities.update(new_entities)
+            json_data = json.loads(json_match.group(1))
+            extracted_entities = json_data.get("extracted_entities", {})
+            has_sufficient = json_data.get("has_sufficient_entities", False)
+            next_questions = json_data.get("next_questions", [])
+
+            # Convert to the format expected by frontend
+            formatted_entities = {}
+            if extracted_entities.get("width"):
+                formatted_entities["width"] = extracted_entities["width"]
+            if extracted_entities.get("length"):
+                formatted_entities["length"] = extracted_entities["length"]
+            if extracted_entities.get("post_height"):
+                formatted_entities["postHeight"] = extracted_entities["post_height"]
+            if extracted_entities.get("number_of_shelves"):
+                formatted_entities["numberOfShelves"] = extracted_entities["number_of_shelves"]
+            if extracted_entities.get("shelf_style"):
+                formatted_entities["shelfStyle"] = extracted_entities["shelf_style"]
+            if extracted_entities.get("solid_bottom_shelf") is not None:
+                formatted_entities["solidBottomShelf"] = extracted_entities["solid_bottom_shelf"]
+            if extracted_entities.get("color_and_finish"):
+                formatted_entities["color"] = extracted_entities["color_and_finish"]
+            if extracted_entities.get("type_of_posts"):
+                formatted_entities["postType"] = extracted_entities["type_of_posts"]
+
+            return formatted_entities, has_sufficient, next_questions
         except json.JSONDecodeError:
             pass
-    
-    # Also extract from natural language in the response
-    text = response.lower()
-    
+
+    # Fallback: extract from natural language
+    return extract_from_natural_language(response), False, []
+
+def extract_from_natural_language(text: str) -> Dict[str, Any]:
+    """Extract entities from natural language as fallback"""
+    entities = {}
+    text_lower = text.lower()
+
     # Extract dimensions
-    width_match = re.search(r'(\d+)\s*(?:inch|inches|in|"|''|′)?\s*(?:wide|width)', text)
+    width_match = re.search(r'(\d+)\s*(?:inch|inches|in|"|''|′)?\s*(?:wide|width)', text_lower)
     if width_match:
-        existing_entities['width'] = int(width_match.group(1))
-    
-    length_match = re.search(r'(\d+)\s*(?:inch|inches|in|"|''|′)?\s*(?:long|length|deep|depth)', text)
+        entities['width'] = int(width_match.group(1))
+
+    length_match = re.search(r'(\d+)\s*(?:inch|inches|in|"|''|′)?\s*(?:long|length|deep|depth)', text_lower)
     if length_match:
-        existing_entities['length'] = int(length_match.group(1))
-    
-    height_match = re.search(r'(\d+)\s*(?:inch|inches|in|"|''|′)?\s*(?:tall|high|height)', text)
+        entities['length'] = int(length_match.group(1))
+
+    height_match = re.search(r'(\d+)\s*(?:inch|inches|in|"|''|′)?\s*(?:tall|high|height)', text_lower)
     if height_match:
-        existing_entities['postHeight'] = int(height_match.group(1))
-    
-    shelves_match = re.search(r'(\d+)\s*(?:shelf|shelves|level|levels|tier|tiers)', text)
+        entities['postHeight'] = int(height_match.group(1))
+
+    shelves_match = re.search(r'(\d+)\s*(?:shelf|shelves|level|levels|tier|tiers)', text_lower)
     if shelves_match:
-        existing_entities['numberOfShelves'] = int(shelves_match.group(1))
-    
-    # Extract colors
-    colors = ['chrome', 'black', 'white', 'stainless steel', 'bronze']
-    for color in colors:
-        if color in text:
-            existing_entities['color'] = color.title()
-    
-    # Extract styles
-    styles = ['industrial grid', 'metro classic', 'commercial pro', 'heavy duty']
-    for style in styles:
-        if style in text:
-            existing_entities['shelfStyle'] = style.title()
-    
-    # Extract post type
-    if 'mobile' in text or 'caster' in text or 'wheel' in text:
-        existing_entities['postType'] = 'Mobile'
-    elif 'stationary' in text or 'fixed' in text:
-        existing_entities['postType'] = 'Stationary'
-    
-    # Extract solid bottom shelf
-    if 'solid bottom' in text or 'solid shelf' in text:
-        existing_entities['solidBottomShelf'] = True
-    elif 'wire bottom' in text or 'no solid' in text:
-        existing_entities['solidBottomShelf'] = False
-    
-    # Store entities for this session
-    setattr(extract_entities_from_response, f'entities_{session_id}', existing_entities)
-    
-    return existing_entities
+        entities['numberOfShelves'] = int(shelves_match.group(1))
+
+    return entities
 
 def check_sufficient_entities(entities: Dict[str, Any]) -> bool:
     """Check if we have all required entities for 3D model"""
@@ -212,42 +313,13 @@ def check_sufficient_entities(entities: Dict[str, Any]) -> bool:
     return all(key in entities and entities[key] is not None for key in required)
 
 def clean_ai_response(response: str) -> str:
-    """Remove the ENTITIES_EXTRACTED and SUFFICIENT parts from response"""
-    # Remove ENTITIES_EXTRACTED section
-    cleaned = re.sub(r'ENTITIES_EXTRACTED:.*$', '', response, flags=re.IGNORECASE | re.DOTALL)
-    cleaned = re.sub(r'SUFFICIENT:.*$', '', cleaned, flags=re.IGNORECASE | re.DOTALL)
-    
-    return cleaned.strip()
+    """Remove the JSON part from response"""
+    # Remove JSON code blocks
+    cleaned = re.sub(r'```json.*?```', '', response, flags=re.DOTALL)
+    # Remove standalone JSON objects
+    cleaned = re.sub(r'\{[^{}]*"extracted_entities"[^{}]*\}', '', cleaned, flags=re.DOTALL)
 
-def generate_next_questions(entities: Dict[str, Any], has_sufficient: bool) -> List[str]:
-    """Generate helpful next questions based on current state"""
-    if has_sufficient:
-        questions = []
-        if 'color' not in entities:
-            questions.append("What color/finish would you prefer?")
-        if 'shelfStyle' not in entities:
-            questions.append("Do you have a preference for shelf style?")
-        if 'solidBottomShelf' not in entities:
-            questions.append("Would you like a solid bottom shelf?")
-        if 'postType' not in entities:
-            questions.append("Do you need this to be mobile with casters?")
-        
-        if not questions:
-            questions.append("Is there anything you'd like to adjust about your shelving unit?")
-        
-        return questions
-    else:
-        missing = []
-        if 'width' not in entities:
-            missing.append("How wide should it be?")
-        if 'length' not in entities:
-            missing.append("How deep/long should it be?")
-        if 'postHeight' not in entities:
-            missing.append("How tall should it be?")
-        if 'numberOfShelves' not in entities:
-            missing.append("How many shelves do you need?")
-        
-        return missing
+    return cleaned.strip()
 
 @app.get("/api/chat/history/{session_id}")
 async def get_chat_history(session_id: str):
@@ -261,10 +333,7 @@ async def clear_chat_session(session_id: str):
         del chat_sessions[session_id]
     if session_id in chat_histories:
         del chat_histories[session_id]
-    # Clear stored entities
-    if hasattr(extract_entities_from_response, f'entities_{session_id}'):
-        delattr(extract_entities_from_response, f'entities_{session_id}')
-    
+
     return {"message": "Session cleared"}
 
 if __name__ == "__main__":

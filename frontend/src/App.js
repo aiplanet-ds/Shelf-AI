@@ -16,9 +16,9 @@ const WireShelf3D = ({ width, length, postHeight, numberOfShelves, color, shelfS
   useEffect(() => {
     if (!mountRef.current) return;
 
-    // Premium scene setup with sophisticated lighting
+    // Dark mode scene setup with sophisticated lighting
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf8fafb);
+    scene.background = new THREE.Color(0x1a1a1a);
     
     const camera = new THREE.PerspectiveCamera(75, 1200 / 800, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({
@@ -275,12 +275,12 @@ const WireShelf3D = ({ width, length, postHeight, numberOfShelves, color, shelfS
       });
     }
 
-    // Premium ground plane with subtle gradient
+    // Dark mode ground plane with subtle gradient
     const groundGeometry = new THREE.PlaneGeometry(120, 120);
-    const groundMaterial = new THREE.MeshLambertMaterial({ 
-      color: 0xf1f3f4, 
-      transparent: true, 
-      opacity: 0.4 
+    const groundMaterial = new THREE.MeshLambertMaterial({
+      color: 0x2a2a2a,
+      transparent: true,
+      opacity: 0.3
     });
     const ground = new THREE.Mesh(groundGeometry, groundMaterial);
     ground.rotation.x = -Math.PI / 2;
@@ -407,8 +407,8 @@ const ChatInterface = ({ onParametersExtracted, extractedParams, sessionId }) =>
             </svg>
           </div>
           <div className="flex-1">
-            <h3 className="text-2xl font-bold text-slate-800 mb-1">Wire Shelf Designer</h3>
-            <p className="text-slate-600 font-medium text-lg">Professional AI Assistant</p>
+            <h3 className="text-2xl font-bold text-white mb-1">Wire Shelf Designer</h3>
+            <p className="text-gray-300 font-medium text-lg">Professional AI Assistant</p>
           </div>
           <div className="ml-auto">
             <div className="premium-status-badge">
@@ -425,7 +425,7 @@ const ChatInterface = ({ onParametersExtracted, extractedParams, sessionId }) =>
             <div className={`max-w-[80%] font-medium ${
               message.type === 'user'
                 ? 'premium-user-message text-white ml-8'
-                : 'premium-ai-message text-slate-700 mr-8'
+                : 'premium-ai-message text-gray-200 mr-8'
             }`}>
               <p className="leading-relaxed text-base">{message.content}</p>
             </div>
@@ -433,7 +433,7 @@ const ChatInterface = ({ onParametersExtracted, extractedParams, sessionId }) =>
         ))}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="premium-ai-message text-slate-700 mr-8">
+            <div className="premium-ai-message text-gray-200 mr-8">
               <div className="flex items-center space-x-3">
                 <div className="premium-loading-dot"></div>
                 <div className="premium-loading-dot" style={{animationDelay: '0.15s'}}></div>
@@ -482,7 +482,7 @@ const ParameterControls = ({ params, onParamsChange }) => {
     <div className="premium-card space-y-6">
       <div className="premium-header p-6 pb-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-xl font-bold text-slate-800">Configuration Panel</h3>
+          <h3 className="text-xl font-bold text-white">Configuration Panel</h3>
           {hasRequiredParams && (
             <div className="premium-ready-badge">
               <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -710,10 +710,10 @@ const BillOfMaterials = ({ params }) => {
     Math.round(params.width * params.length * params.numberOfShelves * 0.8 + params.postHeight * 2) : 0;
 
   const categoryColors = {
-    'Structure': 'bg-slate-100 text-slate-800',
-    'Shelving': 'bg-blue-100 text-blue-800',
-    'Hardware': 'bg-amber-100 text-amber-800',
-    'Mobility': 'bg-emerald-100 text-emerald-800'
+    'Structure': 'bg-gray-700 text-gray-200',
+    'Shelving': 'bg-blue-900 text-blue-200',
+    'Hardware': 'bg-amber-900 text-amber-200',
+    'Mobility': 'bg-green-900 text-green-200'
   };
 
   return (
@@ -721,8 +721,8 @@ const BillOfMaterials = ({ params }) => {
       <div className="premium-header p-6 pb-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-2xl font-bold text-slate-800">Bill of Materials</h3>
-            <p className="text-slate-500 font-medium mt-1">Professional specification sheet</p>
+            <h3 className="text-2xl font-bold text-white">Bill of Materials</h3>
+            <p className="text-gray-300 font-medium mt-1">Professional specification sheet</p>
           </div>
           {bomItems.length > 0 && (
             <div className="text-right">
@@ -747,8 +747,8 @@ const BillOfMaterials = ({ params }) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <h4 className="text-xl font-bold text-slate-700 mb-2">Ready to Generate BOM</h4>
-            <p className="text-slate-500 max-w-md mx-auto">Complete your configuration using our AI assistant to generate a detailed bill of materials with professional specifications.</p>
+            <h4 className="text-xl font-bold text-white mb-2">Ready to Generate BOM</h4>
+            <p className="text-gray-300 max-w-md mx-auto">Complete your configuration using our AI assistant to generate a detailed bill of materials with professional specifications.</p>
           </div>
         </div>
       ) : (
@@ -769,11 +769,11 @@ const BillOfMaterials = ({ params }) => {
               <tbody>
                 {bomItems.map((item, index) => (
                   <tr key={index}>
-                    <td className="font-semibold text-slate-800">{item.description}</td>
+                    <td className="font-semibold text-white">{item.description}</td>
                     <td className="premium-model-number">{item.modelNumber}</td>
-                    <td className="text-center font-bold text-slate-700">{item.quantity}</td>
-                    <td className="text-center text-slate-600">{item.length}</td>
-                    <td className="text-center text-slate-600">{item.width}</td>
+                    <td className="text-center font-bold text-gray-200">{item.quantity}</td>
+                    <td className="text-center text-gray-300">{item.length}</td>
+                    <td className="text-center text-gray-300">{item.width}</td>
                     <td>
                       <span className="premium-finish-badge">
                         {item.colorFinish}
@@ -863,7 +863,7 @@ function App() {
               <div className="premium-card">
                 <div className="premium-header p-6 pb-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold text-slate-800">3D Visualization</h3>
+                    <h3 className="text-xl font-bold text-white">3D Visualization</h3>
                     <div className="premium-3d-badges">
                       <span className="premium-style-badge">{shelfParams.shelfStyle}</span>
                       <span className="premium-finish-badge">{shelfParams.color}</span>
@@ -886,25 +886,25 @@ function App() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M9 21l3-3 3 3M9 5l3-3 3 3" />
                       </svg>
                     </div>
-                    <h3 className="text-2xl font-bold text-slate-700 mb-3">3D Model Preview</h3>
-                    <p className="text-lg text-slate-500 mb-6">Your personalized wire shelving unit will appear here once you provide the essential dimensions</p>
+                    <h3 className="text-2xl font-bold text-white mb-3">3D Model Preview</h3>
+                    <p className="text-lg text-gray-300 mb-6">Your personalized wire shelving unit will appear here once you provide the essential dimensions</p>
                     <div className="premium-requirements-card">
-                      <h4 className="font-bold text-slate-700 mb-2">Required Information:</h4>
-                      <div className="text-sm text-slate-600 space-y-1">
+                      <h4 className="font-bold text-white mb-2">Required Information:</h4>
+                      <div className="text-sm text-gray-300 space-y-1">
                         <div className="flex items-center">
-                          <svg className="w-4 h-4 mr-2 text-slate-400" fill="currentColor" viewBox="0 0 20 20">
+                          <svg className="w-4 h-4 mr-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                           </svg>
                           Width & Length dimensions
                         </div>
                         <div className="flex items-center">
-                          <svg className="w-4 h-4 mr-2 text-slate-400" fill="currentColor" viewBox="0 0 20 20">
+                          <svg className="w-4 h-4 mr-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                           </svg>
                           Overall height specification
                         </div>
                         <div className="flex items-center">
-                          <svg className="w-4 h-4 mr-2 text-slate-400" fill="currentColor" viewBox="0 0 20 20">
+                          <svg className="w-4 h-4 mr-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                           </svg>
                           Number of shelf levels

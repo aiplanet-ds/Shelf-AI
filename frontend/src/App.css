@@ -1,51 +1,51 @@
 /* Premium Wire Shelves 3D Configurator Styles */
 
 :root {
-  /* Enhanced Premium Color Palette - High Quality */
-  --premium-primary: #0f172a;
-  --premium-secondary: #1e293b;
-  --premium-tertiary: #334155;
-  --premium-accent: #4f46e5;
-  --premium-accent-light: #6366f1;
-  --premium-accent-dark: #3730a3;
-  --premium-accent-glow: rgba(79, 70, 229, 0.15);
-  --premium-success: #10b981;
-  --premium-success-light: #34d399;
+  /* Dark Mode Color Palette with Green Secondary */
+  --premium-primary: #0a0a0a;
+  --premium-secondary: #1a1a1a;
+  --premium-tertiary: #2a2a2a;
+  --premium-accent: #22c55e;
+  --premium-accent-light: #4ade80;
+  --premium-accent-dark: #16a34a;
+  --premium-accent-glow: rgba(34, 197, 94, 0.2);
+  --premium-success: #22c55e;
+  --premium-success-light: #4ade80;
   --premium-warning: #f59e0b;
   --premium-error: #ef4444;
-  --premium-surface: #ffffff;
-  --premium-surface-elevated: #fefefe;
-  --premium-surface-muted: #f8fafc;
-  --premium-surface-card: #fdfdfd;
-  --premium-text-primary: #0f172a;
-  --premium-text-secondary: #374151;
-  --premium-text-muted: #6b7280;
-  --premium-text-light: #9ca3af;
-  --premium-border: #e5e7eb;
-  --premium-border-light: #f3f4f6;
-  --premium-border-muted: #f9fafb;
+  --premium-surface: #1a1a1a;
+  --premium-surface-elevated: #2a2a2a;
+  --premium-surface-muted: #0f0f0f;
+  --premium-surface-card: #1f1f1f;
+  --premium-text-primary: #ffffff;
+  --premium-text-secondary: #d1d5db;
+  --premium-text-muted: #9ca3af;
+  --premium-text-light: #6b7280;
+  --premium-border: #374151;
+  --premium-border-light: #4b5563;
+  --premium-border-muted: #374151;
   
-  /* Enhanced Premium Shadows */
-  --shadow-soft: 0 1px 3px 0 rgba(15, 23, 42, 0.08), 0 1px 2px 0 rgba(15, 23, 42, 0.04);
-  --shadow-medium: 0 4px 6px -1px rgba(15, 23, 42, 0.1), 0 2px 4px -1px rgba(15, 23, 42, 0.06);
-  --shadow-large: 0 10px 15px -3px rgba(15, 23, 42, 0.12), 0 4px 6px -2px rgba(15, 23, 42, 0.05);
-  --shadow-premium: 0 20px 25px -5px rgba(15, 23, 42, 0.15), 0 10px 10px -5px rgba(15, 23, 42, 0.04);
-  --shadow-glow: 0 0 0 1px var(--premium-accent-glow), 0 0 20px rgba(79, 70, 229, 0.12);
-  --shadow-card: 0 8px 32px rgba(15, 23, 42, 0.08), 0 4px 16px rgba(15, 23, 42, 0.04);
-  --shadow-floating: 0 16px 64px rgba(15, 23, 42, 0.12), 0 8px 32px rgba(15, 23, 42, 0.06);
+  /* Dark Mode Shadows */
+  --shadow-soft: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  --shadow-premium: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+  --shadow-glow: 0 0 0 1px var(--premium-accent-glow), 0 0 20px rgba(34, 197, 94, 0.3);
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.2);
+  --shadow-floating: 0 16px 64px rgba(0, 0, 0, 0.5), 0 8px 32px rgba(0, 0, 0, 0.3);
 
-  /* Enhanced Premium Gradients */
-  --gradient-primary: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
-  --gradient-accent: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-  --gradient-surface: linear-gradient(135deg, #fefefe 0%, #f8fafc 100%);
-  --gradient-card: linear-gradient(145deg, #ffffff 0%, #fdfdfd 100%);
-  --gradient-header: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
-  --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  /* Dark Mode Gradients */
+  --gradient-primary: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  --gradient-accent: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+  --gradient-surface: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
+  --gradient-card: linear-gradient(145deg, #1f1f1f 0%, #1a1a1a 100%);
+  --gradient-header: linear-gradient(135deg, rgba(26, 26, 26, 0.95) 0%, rgba(15, 15, 15, 0.95) 100%);
+  --gradient-success: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
   
-  /* Enhanced Typography System */
-  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', Consolas, monospace;
-  --font-display: 'Inter', system-ui, sans-serif;
+  /* Simple Typography System */
+  --font-primary: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --font-mono: 'Courier New', Courier, monospace;
+  --font-display: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
   /* Enhanced Font Sizes - Better Scaling */
   --text-xs: 0.75rem;    /* 12px */
@@ -90,22 +90,21 @@ html {
 }
 
 body {
-  font-feature-settings: 'kern' 1, 'liga' 1, 'frac' 1, 'cv02' 1, 'cv03' 1, 'cv04' 1;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  line-height: 1.6;
+  line-height: 1.5;
   color: var(--premium-text-primary);
   background: var(--premium-surface-muted);
   margin: 0;
   padding: 0;
 }
 
-/* Enhanced Premium App Layout */
+/* Dark Mode App Layout */
 .premium-app {
   min-height: 100vh;
   width: 100%;
-  background: linear-gradient(135deg, #fefefe 0%, #f8fafc 25%, #f1f5f9 50%, #f8fafc 75%, #fefefe 100%);
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 25%, #0f0f0f 50%, #1a1a1a 75%, #0a0a0a 100%);
   font-size: var(--text-base);
 }
 
@@ -123,13 +122,13 @@ body {
 .premium-app-header .max-w-7xl {
   max-width: none;
   width: 100%;
-  padding: var(--space-8) var(--space-12);
+  padding: var(--space-4) var(--space-6);
 }
 
 .premium-app > .max-w-7xl {
   max-width: none;
   width: 100%;
-  padding: var(--space-8) var(--space-12);
+  padding: var(--space-4) var(--space-6);
 }
 
 .premium-brand {
@@ -137,21 +136,21 @@ body {
 }
 
 .premium-title {
-  font-size: var(--text-4xl);
-  font-weight: 800;
+  font-size: var(--text-2xl);
+  font-weight: 700;
   color: var(--premium-text-primary);
   letter-spacing: -0.025em;
-  line-height: 1.1;
+  line-height: 1.2;
   font-family: var(--font-display);
 }
 
 .premium-subtitle {
-  font-size: var(--text-lg);
+  font-size: var(--text-base);
   color: var(--premium-text-secondary);
-  font-weight: 500;
-  margin-top: var(--space-2);
+  font-weight: 400;
+  margin-top: var(--space-1);
   letter-spacing: -0.01em;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 .premium-status-indicators {
@@ -191,49 +190,49 @@ body {
   animation: premium-pulse 2s infinite;
 }
 
-/* Enhanced Premium Grid Layout - Better Proportions */
+/* Compressed Grid Layout */
 .premium-grid {
   display: grid;
-  grid-template-columns: 480px 1fr 420px;
+  grid-template-columns: 400px 1fr 350px;
   grid-template-rows: auto auto;
-  grid-gap: var(--space-10);
+  grid-gap: var(--space-6);
   grid-template-areas:
     "chat viewer controls"
     "bom bom bom";
-  min-height: 85vh;
+  min-height: 90vh;
   align-items: start;
 }
 
 .premium-grid-chat {
   grid-area: chat;
-  min-width: 480px;
+  min-width: 400px;
 }
 
 .premium-grid-viewer {
   grid-area: viewer;
-  min-width: 700px;
+  min-width: 600px;
 }
 
 .premium-grid-controls {
   grid-area: controls;
-  min-width: 420px;
+  min-width: 350px;
 }
 
 .premium-grid-bom {
   grid-area: bom;
-  margin-top: var(--space-6);
+  margin-top: var(--space-4);
 }
 
-/* Enhanced Premium Card Interface */
+/* Compressed Card Interface */
 .premium-card {
   background: var(--gradient-card);
-  border-radius: var(--space-6);
+  border-radius: var(--space-4);
   box-shadow: var(--shadow-card);
   border: 1px solid var(--premium-border-light);
   overflow: hidden;
   transition: var(--transition-normal);
   backdrop-filter: blur(20px);
-  min-height: 800px;
+  min-height: 600px;
   position: relative;
 }
 
@@ -260,7 +259,7 @@ body {
   padding: var(--space-8);
 }
 
-/* Enhanced Premium Avatar and Spacing */
+/* Dark Mode Avatar and Spacing */
 .premium-avatar {
   width: var(--space-16);
   height: var(--space-16);
@@ -283,12 +282,12 @@ body {
   display: flex;
   align-items: center;
   padding: 0.75rem 1.25rem;
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-  border: 1px solid #bbf7d0;
+  background: linear-gradient(135deg, #1a2e1a 0%, #2a3a2a 100%);
+  border: 1px solid var(--premium-accent-dark);
   border-radius: 1rem;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #059669;
+  color: var(--premium-accent-light);
 }
 
 .status-dot {
@@ -402,30 +401,30 @@ body {
   cursor: not-allowed;
 }
 
-/* Premium Parameter Controls - More Spacious */
+/* Dark Mode Parameter Controls */
 .premium-ready-badge {
   display: flex;
   align-items: center;
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-  border: 1px solid #a7f3d0;
+  background: linear-gradient(135deg, #1a2e1a 0%, #2a3a2a 100%);
+  border: 1px solid var(--premium-accent-dark);
   border-radius: 1rem;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--premium-success);
+  color: var(--premium-accent-light);
 }
 
 .premium-section-required {
   padding: 2rem;
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border: 1px solid #bfdbfe;
+  background: linear-gradient(135deg, #2a2a2a 0%, #1f2f1f 100%);
+  border: 1px solid var(--premium-accent-dark);
   border-radius: 1.25rem;
   margin-bottom: 1.5rem;
 }
 
 .premium-section-optional {
   padding: 2rem;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
   border: 1px solid var(--premium-border);
   border-radius: 1.25rem;
 }
@@ -547,18 +546,18 @@ body {
 
 .premium-style-badge {
   padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-  border: 1px solid #93c5fd;
+  background: linear-gradient(135deg, #1a2e1a 0%, #2a3a2a 100%);
+  border: 1px solid var(--premium-accent-dark);
   border-radius: 0.5rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--premium-accent-dark);
+  color: var(--premium-accent-light);
 }
 
 .premium-finish-badge {
   padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-  border: 1px solid #d1d5db;
+  background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+  border: 1px solid var(--premium-border);
   border-radius: 0.5rem;
   font-size: 0.75rem;
   font-weight: 600;
@@ -568,7 +567,7 @@ body {
 .premium-3d-footer {
   margin-top: 1rem;
   padding: 1rem;
-  background: linear-gradient(135deg, rgba(248, 250, 252, 0.8) 0%, rgba(241, 245, 249, 0.8) 100%);
+  background: linear-gradient(135deg, rgba(26, 26, 26, 0.8) 0%, rgba(15, 15, 15, 0.8) 100%);
   border-radius: 0.75rem;
   text-align: center;
 }
@@ -597,19 +596,19 @@ body {
 .premium-requirements-card {
   display: inline-block;
   padding: 1.5rem;
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border: 1px solid #bfdbfe;
+  background: linear-gradient(135deg, #1a2e1a 0%, #2a3a2a 100%);
+  border: 1px solid var(--premium-accent-dark);
   border-radius: 1rem;
   text-align: left;
   margin-top: 1rem;
 }
 
-/* Premium Bill of Materials */
+/* Dark Mode Bill of Materials */
 .premium-spec-badge {
   display: flex;
   align-items: center;
   padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
   border: 1px solid var(--premium-border);
   border-radius: 0.5rem;
   font-size: 0.875rem;
@@ -630,7 +629,7 @@ body {
 
 .premium-table th {
   padding: 1.25rem 1rem;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
   border-bottom: 2px solid var(--premium-border);
   font-size: 0.875rem;
   font-weight: 700;
@@ -649,14 +648,14 @@ body {
 }
 
 .premium-table tr:hover {
-  background: linear-gradient(135deg, rgba(248, 250, 252, 0.5) 0%, rgba(241, 245, 249, 0.5) 100%);
+  background: linear-gradient(135deg, rgba(42, 42, 42, 0.5) 0%, rgba(26, 26, 26, 0.5) 100%);
 }
 
 .premium-model-number {
   font-family: var(--font-mono);
   font-size: 0.75rem;
   padding: 0.5rem;
-  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
   border: 1px solid var(--premium-border);
   border-radius: 0.5rem;
   color: var(--premium-text-primary);
@@ -824,13 +823,15 @@ body {
 @media print {
   .premium-app {
     background: white !important;
+    color: black !important;
   }
-  
+
   .premium-card {
     box-shadow: none !important;
-    border: 1px solid #e5e7eb !important;
+    border: 1px solid #000000 !important;
+    background: white !important;
   }
-  
+
   .no-print {
     display: none !important;
   }
