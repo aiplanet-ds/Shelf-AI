@@ -398,7 +398,7 @@ const ChatInterface = ({ onParametersExtracted, extractedParams, sessionId }) =>
   };
 
   return (
-    <div className="premium-card h-[550px] flex flex-col">
+    <div className="premium-card h-[650px] flex flex-col">
       <div className="premium-header p-6 pb-4">
         <div className="flex items-center">
           <div className="premium-avatar mr-4">
