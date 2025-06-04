@@ -1,38 +1,136 @@
-.App {
-    text-align: center;
+/* Custom scrollbar for chat */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 4px;
 }
 
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 2px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 2px;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 
-.App-link {
-    color: #61dafb;
+/* Smooth transitions */
+input, select, button {
+  transition: all 0.2s ease;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+button:hover {
+  transform: translateY(-1px);
+}
+
+/* Table styling */
+table th {
+  font-weight: 600;
+  color: #374151;
+}
+
+table td {
+  color: #6b7280;
+}
+
+/* Loading animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* 3D Canvas container */
+canvas {
+  border-radius: 0.5rem;
+  display: block;
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 1024px) {
+  .grid-cols-12 > * {
+    margin-bottom: 1.5rem;
+  }
+}
+
+/* Form focus states */
+input:focus, select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Chat message animations */
+.chat-message {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Card hover effects */
+.shadow-lg:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.3s ease;
+}
+
+/* Error states */
+.border-red-300 {
+  border-color: #fca5a5;
+}
+
+.text-red-600 {
+  color: #dc2626;
+}
+
+/* Success states */
+.border-green-300 {
+  border-color: #86efac;
+}
+
+.text-green-600 {
+  color: #16a34a;
+}
+
+/* Utility classes */
+.text-xs {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+/* Loading states */
+.opacity-50 {
+  opacity: 0.5;
+}
+
+.cursor-not-allowed {
+  cursor: not-allowed;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none;
+  }
 }
