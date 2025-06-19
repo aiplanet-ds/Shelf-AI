@@ -480,6 +480,14 @@ const ChatInterface = ({ onParametersExtracted, extractedParams, sessionId }) =>
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const chatContainerRef = useRef(null);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [messages, isLoading]);
 
   // Initialize chat with AI greeting
   useEffect(() => {
@@ -542,42 +550,29 @@ const ChatInterface = ({ onParametersExtracted, extractedParams, sessionId }) =>
   };
 
   return (
-    <div className="premium-card h-[820px] flex flex-col">
+    <div className="premium-card">
       <div className="premium-header">
-        <div className="flex items-center">
-          <div className="premium-avatar mr-3">
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 2C5.58 2 2 5.58 2 10s3.58 8 8 8c1.86 0 3.58-.63 4.95-1.69L17.71 18.1c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41l-1.79-1.79C18.37 13.58 19 11.86 19 10c0-4.42-3.58-8-8-8zm0 2c3.32 0 6 2.68 6 6s-2.68 6-6 6-6-2.68-6-6 2.68-6 6-6z" clipRule="evenodd" />
-            </svg>
-          </div>
-          <div className="flex-1">
-            <h3 className="text-lg font-bold text-white mb-0">Wire Shelf Designer</h3>
-            <p className="text-gray-300 font-medium text-sm">Professional AI Assistant</p>
-          </div>
-          <div className="ml-auto">
-            <div className="premium-status-badge">
-              <div className="status-dot animate-pulse"></div>
-              <span className="text-sm font-semibold">Online</span>
-            </div>
-          </div>
+        <div>
+          <h3>Wire Shelf Designer</h3>
+          <p>Professional AI Assistant</p>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 pb-3 space-y-3 premium-scrollbar">
+      <div className="premium-chat-container" ref={chatContainerRef}>
         {messages.map((message, index) => (
           <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] font-medium ${
+            <div className={`${
               message.type === 'user'
-                ? 'premium-user-message text-white ml-4'
-                : 'premium-ai-message text-gray-200 mr-4'
+                ? 'premium-user-message bg-gradient-to-br from-green-500 to-green-600'
+                : 'premium-ai-message bg-gradient-to-br from-gray-800 to-gray-900'
             }`}>
-              <p className="leading-relaxed text-sm">{message.content}</p>
+              <p className="leading-relaxed">{message.content}</p>
             </div>
           </div>
         ))}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="premium-ai-message text-gray-200 mr-8">
+            <div className="premium-ai-message">
               <div className="flex items-center space-x-3">
                 <div className="premium-loading-dot"></div>
                 <div className="premium-loading-dot" style={{animationDelay: '0.15s'}}></div>
@@ -587,26 +582,37 @@ const ChatInterface = ({ onParametersExtracted, extractedParams, sessionId }) =>
           </div>
         )}
       </div>
-      
-      <div className="premium-input-container">
-        <div className="flex space-x-3">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            className="premium-input flex-1"
-            placeholder="Describe your shelving requirements in detail..."
-            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-            disabled={isLoading}
-          />
+
+      <div className="premium-input-container mt-auto">
+        <div className="flex gap-3">
+          <div className="premium-input-wrapper">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+              placeholder="Describe your shelving requirements..."
+              className="premium-input"
+              maxLength={500}
+            />
+            <div className="premium-input-meta">
+              {input.length > 0 && (
+                <span className="premium-input-hint">Press Enter to send</span>
+              )}
+            </div>
+          </div>
           <button
             onClick={handleSend}
-            disabled={isLoading || !input.trim()}
+            disabled={!input.trim() || isLoading}
             className="premium-send-button"
           >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-            </svg>
+{isLoading ? (
+              <div className="premium-loading-dot"></div>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+              </svg>
+            )}
           </button>
         </div>
       </div>
@@ -615,89 +621,75 @@ const ChatInterface = ({ onParametersExtracted, extractedParams, sessionId }) =>
 };
 
 // Premium Parameter Controls Component
-const ParameterControls = ({ params, onParamsChange }) => {
+const ParameterControls = ({ params, onUpdate, onClose }) => {
   const updateParam = (key, value) => {
-    onParamsChange({ ...params, [key]: value });
+    onUpdate({ ...params, [key]: value });
   };
 
   const hasRequiredParams = params.width && params.length && params.postHeight && params.numberOfShelves;
 
   return (
     <div className="premium-card space-y-3">
-      <div className="premium-header p-3 pb-2">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-bold text-white">Configuration Panel</h3>
-          {hasRequiredParams && (
-            <div className="premium-ready-badge">
-              <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              Ready to Build
-            </div>
-          )}
-        </div>
+      <div className="premium-overlay-header">
+        <h3>Configuration Panel</h3>
+        <button className="premium-action-btn" onClick={onClose}>
+          ✕
+        </button>
       </div>
 
       <div className="px-3 pb-3 space-y-3">
-        {/* Required Parameters */}
-        <div className="premium-section-required">
-          <h4 className="premium-section-title mb-2">Essential Dimensions</h4>
-          <div className="space-y-2">
-            <div className="premium-input-group">
+        {/* Essential Dimensions Section */}
+        <div className="premium-section">
+          <h4 className="premium-section-title">ESSENTIAL DIMENSIONS</h4>
+          <div className="space-y-3">
+            <div>
               <label className="premium-label">Width (inches)</label>
               <input
                 type="number"
                 value={params.width || ''}
-                onChange={(e) => updateParam('width', parseInt(e.target.value) || 0)}
-                className="premium-number-input"
-                min="12" max="96"
+                onChange={(e) => updateParam('width', parseFloat(e.target.value) || 0)}
+                className="premium-input"
                 placeholder="36"
               />
             </div>
-            
-            <div className="premium-input-group">
+            <div>
               <label className="premium-label">Length (inches)</label>
               <input
                 type="number"
                 value={params.length || ''}
-                onChange={(e) => updateParam('length', parseInt(e.target.value) || 0)}
-                className="premium-number-input"
-                min="12" max="96"
+                onChange={(e) => updateParam('length', parseFloat(e.target.value) || 0)}
+                className="premium-input"
                 placeholder="18"
               />
             </div>
-            
-            <div className="premium-input-group">
+            <div>
               <label className="premium-label">Height (inches)</label>
               <input
                 type="number"
                 value={params.postHeight || ''}
-                onChange={(e) => updateParam('postHeight', parseInt(e.target.value) || 0)}
-                className="premium-number-input"
-                min="24" max="84"
+                onChange={(e) => updateParam('postHeight', parseFloat(e.target.value) || 0)}
+                className="premium-input"
                 placeholder="72"
               />
             </div>
-            
-            <div className="premium-input-group">
+            <div>
               <label className="premium-label">Number of Shelves</label>
               <input
                 type="number"
                 value={params.numberOfShelves || ''}
                 onChange={(e) => updateParam('numberOfShelves', parseInt(e.target.value) || 0)}
-                className="premium-number-input"
-                min="2" max="8"
+                className="premium-input"
                 placeholder="4"
               />
             </div>
           </div>
         </div>
 
-        {/* Optional Parameters */}
-        <div className="premium-section-optional">
-          <h4 className="premium-section-title mb-2">Style & Finish Options</h4>
-          <div className="space-y-2">
-            <div className="premium-input-group">
+        {/* Style & Finish Options Section */}
+        <div className="premium-section">
+          <h4 className="premium-section-title">STYLE & FINISH OPTIONS</h4>
+          <div className="space-y-3">
+            <div>
               <label className="premium-label">Color & Finish</label>
               <select
                 value={params.color || 'Chrome'}
@@ -711,8 +703,7 @@ const ParameterControls = ({ params, onParamsChange }) => {
                 <option value="Bronze">Bronze</option>
               </select>
             </div>
-            
-            <div className="premium-input-group">
+            <div>
               <label className="premium-label">Shelf Style</label>
               <select
                 value={params.shelfStyle || 'Industrial Grid'}
@@ -727,22 +718,30 @@ const ParameterControls = ({ params, onParamsChange }) => {
             </div>
             
             <div className="premium-toggle-container">
-              <div className="premium-toggle-info">
-                <label className="premium-label">Solid Bottom Shelf</label>
-                <p className="premium-sublabel">Enhanced stability for heavy items</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="premium-label">Solid Bottom Shelf</label>
+                  <p className="text-gray-400 text-sm">Enhanced stability for heavy items</p>
+                </div>
+                <div className="premium-toggle">
+                  <input
+                    type="checkbox"
+                    checked={params.solidBottomShelf || false}
+                    onChange={(e) => updateParam('solidBottomShelf', e.target.checked)}
+                    className="premium-toggle-input"
+                  />
+                  <span className="premium-toggle-slider"></span>
+                </div>
               </div>
-              <label className="premium-toggle">
-                <input
-                  type="checkbox"
-                  checked={params.solidBottomShelf || false}
-                  onChange={(e) => updateParam('solidBottomShelf', e.target.checked)}
-                  className="sr-only"
-                />
-                <div className="premium-toggle-slider"></div>
-              </label>
             </div>
-            
-            <div className="premium-input-group">
+          </div>
+        </div>
+
+        {/* Mobility Type Section */}
+        <div className="premium-section">
+          <h4 className="premium-section-title">MOBILITY TYPE</h4>
+          <div className="space-y-3">
+            <div>
               <label className="premium-label">Mobility Type</label>
               <select
                 value={params.postType || 'Stationary'}
@@ -755,65 +754,13 @@ const ParameterControls = ({ params, onParamsChange }) => {
             </div>
           </div>
         </div>
-
-        {/* Accessories Section */}
-        <div className="premium-section-optional">
-          <h4 className="premium-section-title mb-2">Accessories</h4>
-          <div className="space-y-2">
-            <div className="premium-input-group">
-              <label className="premium-label">Shelf Dividers</label>
-              <p className="premium-sublabel">Add vertical dividers to create organized sections</p>
-              <div className="grid grid-cols-2 gap-4 mt-2">
-                <div>
-                  <label className="text-sm font-medium text-gray-300 mb-1 block">Number of Dividers per Shelf</label>
-                  <input
-                    type="number"
-                    value={params.shelfDividersCount || ''}
-                    onChange={(e) => updateParam('shelfDividersCount', parseInt(e.target.value) || 0)}
-                    className="premium-number-input"
-                    min="0" max="6"
-                    placeholder="0"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-300 mb-1 block">Apply to Shelves</label>
-                  <input
-                    type="text"
-                    value={params.shelfDividersShelves ? params.shelfDividersShelves.join(', ') : ''}
-                    onChange={(e) => {
-                      const shelves = e.target.value.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
-                      updateParam('shelfDividersShelves', shelves);
-                    }}
-                    className="premium-number-input"
-                    placeholder="1, 2, 3"
-                  />
-                  <p className="text-xs text-gray-400 mt-1">Enter shelf numbers separated by commas (e.g., 1, 2, 3)</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="premium-input-group">
-              <label className="premium-label">Enclosure Panels</label>
-              <p className="premium-sublabel">Add protective panels for security and weather protection</p>
-              <select
-                value={params.enclosureType || 'none'}
-                onChange={(e) => updateParam('enclosureType', e.target.value)}
-                className="premium-select"
-              >
-                <option value="none">No Enclosure</option>
-                <option value="top">Top Panel Only</option>
-                <option value="sides">Three Side Panels (Back + Left + Right)</option>
-              </select>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
 };
 
 // Premium Bill of Materials Component
-const BillOfMaterials = ({ params }) => {
+const BillOfMaterials = ({ params, hasMinimumParams, onClose }) => {
   const generateBOM = () => {
     if (!params.width || !params.length || !params.postHeight || !params.numberOfShelves) {
       return [];
@@ -967,80 +914,83 @@ const BillOfMaterials = ({ params }) => {
   };
 
   return (
-    <div className="premium-card">
-      <div className="premium-header p-3 pb-2">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-bold text-white">Bill of Materials</h3>
-            <p className="text-gray-300 font-medium text-sm mt-0">Professional specification sheet</p>
-          </div>
-          {bomItems.length > 0 && (
-            <div className="text-right">
-              <div className="premium-spec-badge mb-2">
-                <span className="text-sm">Est. Weight:</span>
-                <span className="font-bold ml-2">{estimatedWeight} lbs</span>
-              </div>
-              <div className="premium-spec-badge">
-                <span className="text-sm">Components:</span>
-                <span className="font-bold ml-2">{bomItems.reduce((sum, item) => sum + item.quantity, 0)}</span>
-              </div>
-            </div>
-          )}
-        </div>
+    <div className="premium-card premium-bom-panel">
+      <div className="premium-overlay-header">
+        <h3>Bill of Materials</h3>
+        <button className="premium-action-btn" onClick={onClose}>
+          ✕
+        </button>
       </div>
       
-      {bomItems.length === 0 ? (
-        <div className="premium-empty-state p-6">
-          <div className="text-center">
-            <div className="premium-empty-icon mb-3">
-              <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
+      <div className="premium-bom-header">
+        <p className="premium-bom-subtitle">Professional specification sheet</p>
+      </div>
+      
+      <div className="premium-bom-content">
+        {!hasMinimumParams ? (
+          <div className="premium-empty-state">
+            <div className="text-center">
+              <div className="premium-empty-icon mb-4">
+                <svg width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="currentColor">
+                  <rect x="10" y="20" width="60" height="40" strokeWidth="2" rx="4" />
+                  <line x1="20" y1="30" x2="60" y2="30" strokeWidth="1" />
+                  <line x1="20" y1="40" x2="60" y2="40" strokeWidth="1" />
+                  <line x1="20" y1="50" x2="60" y2="50" strokeWidth="1" />
+                </svg>
+              </div>
+              <h4 className="premium-empty-title">Ready to Generate BOM</h4>
+              <p className="premium-empty-description">
+                Complete your configuration using our AI assistant to generate a detailed bill of materials with professional specifications.
+              </p>
             </div>
-            <h4 className="text-lg font-bold text-white mb-2">Ready to Generate BOM</h4>
-            <p className="text-gray-300 max-w-md mx-auto text-sm">Complete your configuration using our AI assistant to generate a detailed bill of materials with professional specifications.</p>
           </div>
-        </div>
-      ) : (
-        <div className="px-3 pb-3">
-          <div className="premium-table-container">
-            <table className="premium-table">
-              <thead>
-                <tr>
-                  <th>Component Description</th>
-                  <th>Model Number</th>
-                  <th className="text-center">Qty</th>
-                  <th className="text-center">Length</th>
-                  <th className="text-center">Width</th>
-                  <th>Finish</th>
-                  <th>Category</th>
-                </tr>
-              </thead>
-              <tbody>
-                {bomItems.map((item, index) => (
-                  <tr key={index}>
-                    <td className="font-semibold text-white">{item.description}</td>
-                    <td className="premium-model-number">{item.modelNumber}</td>
-                    <td className="text-center font-bold text-gray-200">{item.quantity}</td>
-                    <td className="text-center text-gray-300">{item.length}</td>
-                    <td className="text-center text-gray-300">{item.width}</td>
-                    <td>
-                      <span className="premium-finish-badge">
-                        {item.colorFinish}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={`premium-category-badge ${categoryColors[item.category] || 'bg-gray-100 text-gray-800'}`}>
+        ) : (
+          <div className="premium-bom-list">
+            {bomItems.map((item, index) => (
+              <div key={index} className="premium-bom-item">
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex-1 mr-4">
+                    <h4 className="premium-bom-title">{item.description}</h4>
+                    <div className="premium-bom-category">
+                      <span className={`premium-category-badge ${categoryColors[item.category] || 'bg-gray-700 text-gray-200'}`}>
                         {item.category}
                       </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="premium-bom-quantity">Qty: {item.quantity}</div>
+                  </div>
+                </div>
+                <div className="premium-bom-specs">
+                  <div className="flex flex-wrap gap-2">
+                    {item.modelNumber && (
+                      <span className="premium-spec-tag">Model: {item.modelNumber}</span>
+                    )}
+                    {item.length !== '-' && (
+                      <span className="premium-spec-tag">L: {item.length}</span>
+                    )}
+                    {item.width !== '-' && (
+                      <span className="premium-spec-tag">W: {item.width}</span>
+                    )}
+                    <span className="premium-spec-tag">{item.colorFinish}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            <div className="premium-bom-summary">
+              <div className="flex justify-between items-center mb-2">
+                <span className="premium-summary-label">Total Components:</span>
+                <span className="premium-summary-value">{bomItems.reduce((sum, item) => sum + item.quantity, 0)}</span>
+              </div>
+              <div className="flex justify-between items-center mb-2">
+                <span className="premium-summary-label">Estimated Weight:</span>
+                <span className="premium-summary-value">{estimatedWeight} lbs</span>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
@@ -1069,40 +1019,50 @@ function App() {
     setShelfParams(newParams);
   };
 
+  const [showControls, setShowControls] = useState(false);
+  const [showBOM, setShowBOM] = useState(false);
+
+  const toggleControls = () => {
+    setShowControls((prev) => !prev);
+    if (!showControls) setShowBOM(false);
+  };
+
+  const toggleBOM = () => {
+    setShowBOM((prev) => !prev);
+    if (!showBOM) setShowControls(false);
+  };
+
   return (
     <div className="premium-app">
-      {/* Premium Header */}
       <header className="premium-app-header">
-        <div className="max-w-7xl mx-auto px-8 py-8">
-          <div className="flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="premium-brand">
               <h1 className="premium-title">Wire Shelves 3D Configurator</h1>
               <p className="premium-subtitle">Professional-grade shelving solutions with AI-powered design assistance</p>
             </div>
             <div className="premium-status-indicators">
-              <div className="premium-indicator-ai">
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
-                </svg>
-                AI Powered
-              </div>
-              {hasMinimumParams && (
-                <div className="premium-indicator-ready">
-                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  3D Ready
-                </div>
-              )}
+            </div>
+            <div className="premium-top-actions">
+              <button className="premium-action-btn" onClick={toggleControls}>
+                Configuration
+              </button>
+              <button className="premium-action-btn" onClick={toggleBOM}>
+                Bill of Materials
+              </button>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-8 py-8">
+      <main className="max-w-8xl mx-auto">
         <div className="premium-grid">
-          {/* AI Chat Interface */}
           <div className="premium-grid-chat">
+            <div className="scanning-beams">
+              <div className="beam-right"></div>
+              <div className="beam-bottom"></div>
+              <div className="beam-left"></div>
+            </div>
             <ChatInterface 
               onParametersExtracted={updateShelfParams}
               extractedParams={shelfParams}
@@ -1110,11 +1070,15 @@ function App() {
             />
           </div>
 
-          {/* 3D Viewer */}
           <div className="premium-grid-viewer">
+            <div className="scanning-beams">
+              <div className="beam-right"></div>
+              <div className="beam-bottom"></div>
+              <div className="beam-left"></div>
+            </div>
             {hasMinimumParams ? (
               <div className="premium-card">
-                <div className="premium-header p-6 pb-4">
+                <div className="premium-header">
                   <div className="flex items-center justify-between">
                     <h3 className="text-xl font-bold text-white">3D Visualization</h3>
                     <div className="premium-3d-badges">
@@ -1123,7 +1087,7 @@ function App() {
                     </div>
                   </div>
                 </div>
-                <div className="px-6 pb-6">
+                <div className="premium-card-content">
                   <WireShelf3D {...shelfParams} />
                   <div className="premium-3d-footer">
                     <p>Interactive 3D Model • Photorealistic Rendering • Real-time Updates</p>
@@ -1131,59 +1095,87 @@ function App() {
                 </div>
               </div>
             ) : (
-              <div className="premium-card h-[820px] premium-empty-3d">
-                <div className="premium-empty-state p-12">
-                  <div className="text-center">
-                    <div className="premium-empty-icon mb-6">
-                      <svg className="w-20 h-20 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M9 21l3-3 3 3M9 5l3-3 3 3" />
-                      </svg>
-                    </div>
-                    <h3 className="text-2xl font-bold text-white mb-3">3D Model Preview</h3>
-                    <p className="text-lg text-gray-300 mb-6">Your personalized wire shelving unit will appear here once you provide the essential dimensions</p>
-                    <div className="premium-requirements-card">
-                      <h4 className="font-bold text-white mb-2">Required Information:</h4>
-                      <div className="text-sm text-gray-300 space-y-1">
-                        <div className="flex items-center">
-                          <svg className="w-4 h-4 mr-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                          </svg>
-                          Width & Length dimensions
-                        </div>
-                        <div className="flex items-center">
-                          <svg className="w-4 h-4 mr-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                          </svg>
-                          Overall height specification
-                        </div>
-                        <div className="flex items-center">
-                          <svg className="w-4 h-4 mr-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                          </svg>
-                          Number of shelf levels
-                        </div>
-                      </div>
-                    </div>
+              <div className="premium-card premium-empty-3d">
+                <div className="text-center">
+                  <div className="premium-empty-icon mb-6">
+                    <svg width="120" height="120" viewBox="0 0 120 120" fill="none" stroke="currentColor">
+                      {/* Wireframe cube design */}
+                      <g strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        {/* Front face */}
+                        <rect x="20" y="30" width="40" height="40" />
+                        {/* Back face */}
+                        <rect x="35" y="15" width="40" height="40" />
+                        {/* Connecting lines */}
+                        <line x1="20" y1="30" x2="35" y2="15" />
+                        <line x1="60" y1="30" x2="75" y2="15" />
+                        <line x1="60" y1="70" x2="75" y2="55" />
+                        <line x1="20" y1="70" x2="35" y2="55" />
+                        {/* Shelf lines inside */}
+                        <line x1="25" y1="40" x2="55" y2="40" opacity="0.6" />
+                        <line x1="25" y1="50" x2="55" y2="50" opacity="0.6" />
+                        <line x1="25" y1="60" x2="55" y2="60" opacity="0.6" />
+                        <line x1="40" y1="25" x2="70" y2="25" opacity="0.6" />
+                        <line x1="40" y1="35" x2="70" y2="35" opacity="0.6" />
+                        <line x1="40" y1="45" x2="70" y2="45" opacity="0.6" />
+                      </g>
+                    </svg>
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-3">3D Model Preview</h3>
+                  <p className="text-lg text-gray-300 mb-6">Your personalized wire shelving unit will appear here once you provide the essential dimensions</p>
+                  <div className="premium-requirements-card inline-block">
+                    <h4 className="text-sm font-semibold text-green-400 mb-2">Required Information:</h4>
+                    <ul className="space-y-2 text-sm text-gray-300">
+                      <li className="flex items-center">
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Width & Length dimensions
+                      </li>
+                      <li className="flex items-center">
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Overall height specification
+                      </li>
+                      <li className="flex items-center">
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Number of shelf levels
+                      </li>
+                    </ul>
                   </div>
                 </div>
               </div>
             )}
           </div>
-
-          {/* Configuration Panel */}
-          <div className="premium-grid-controls">
-            <ParameterControls 
-              params={shelfParams}
-              onParamsChange={updateShelfParams}
-            />
-          </div>
-
-          {/* Bill of Materials */}
-          <div className="premium-grid-bom">
-            <BillOfMaterials params={shelfParams} />
-          </div>
         </div>
-      </div>
+
+        {/* Overlay Panels */}
+        {showControls && (
+          <div className="premium-overlay open">
+            <div className="premium-overlay-content">
+              <ParameterControls 
+                params={shelfParams}
+                onUpdate={updateShelfParams}
+                onClose={toggleControls}
+              />
+            </div>
+          </div>
+        )}
+
+        {showBOM && (
+          <div className="premium-overlay open" style={{width: '500px'}}>
+            <div className="premium-overlay-content">
+              <BillOfMaterials 
+                params={shelfParams}
+                hasMinimumParams={hasMinimumParams}
+                onClose={toggleBOM}
+              />
+            </div>
+          </div>
+        )}
+      </main>
     </div>
   );
 }
