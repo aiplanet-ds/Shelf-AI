@@ -1,5 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
 import * as THREE from 'three';
+import { STLExporter } from 'three/examples/jsm/exporters/STLExporter.js';
+import { saveAs } from 'file-saver';
 import axios from 'axios';
 import './App.css';
 
@@ -7,11 +9,12 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 // Enhanced Wire Shelf 3D Component with premium materials
-const WireShelf3D = ({ width, length, postHeight, numberOfShelves, color, shelfStyle, solidBottomShelf, postType, shelfDividersCount, shelfDividersShelves, enclosureType }) => {
+const WireShelf3D = forwardRef(({ width, length, postHeight, numberOfShelves, color, shelfStyle, solidBottomShelf, postType, shelfDividersCount, shelfDividersShelves, enclosureType }, ref) => {
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
   const rendererRef = useRef(null);
   const frameRef = useRef(null);
+  const shelfGroupRef = useRef(null);
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -454,6 +457,7 @@ const WireShelf3D = ({ width, length, postHeight, numberOfShelves, color, shelfS
     // Store refs
     sceneRef.current = scene;
     rendererRef.current = renderer;
+    shelfGroupRef.current = shelfGroup;
 
     // Cleanup function
     return () => {
@@ -467,12 +471,35 @@ const WireShelf3D = ({ width, length, postHeight, numberOfShelves, color, shelfS
     };
   }, [width, length, postHeight, numberOfShelves, color, shelfStyle, solidBottomShelf, postType, shelfDividersCount, shelfDividersShelves, enclosureType]);
 
+  // Expose export functionality through ref
+  useImperativeHandle(ref, () => ({
+    exportSTL: () => {
+      if (!shelfGroupRef.current) {
+        console.error('Shelf model not ready for export');
+        return;
+      }
+
+      try {
+        const exporter = new STLExporter();
+        const stlString = exporter.parse(shelfGroupRef.current);
+        const blob = new Blob([stlString], { type: 'text/plain' });
+        
+        // Generate filename with shelf specifications
+        const filename = `shelf_${width}x${length}x${postHeight}_${numberOfShelves}shelves.stl`;
+        saveAs(blob, filename);
+      } catch (error) {
+        console.error('Error exporting STL:', error);
+        alert('Error exporting 3D model. Please try again.');
+      }
+    }
+  }), [width, length, postHeight, numberOfShelves]);
+
   return (
     <div className="premium-3d-container">
       <div ref={mountRef} className="rounded-2xl overflow-hidden shadow-premium" />
     </div>
   );
-};
+});
 
 // Premium Chat Component with sophisticated design
 const ChatInterface = ({ onParametersExtracted, extractedParams, sessionId }) => {
@@ -1062,11 +1089,20 @@ function App() {
   });
 
   const [sessionId] = useState(() => 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9));
+  const shelf3DRef = useRef(null);
 
   const hasMinimumParams = shelfParams.width && shelfParams.length && shelfParams.postHeight && shelfParams.numberOfShelves;
 
   const updateShelfParams = (newParams) => {
     setShelfParams(newParams);
+  };
+
+  const handleDownload3DModel = () => {
+    if (shelf3DRef.current && shelf3DRef.current.exportSTL) {
+      shelf3DRef.current.exportSTL();
+    } else {
+      alert('3D model is not ready for download. Please wait for the model to load.');
+    }
   };
 
   return (
@@ -1117,14 +1153,26 @@ function App() {
                 <div className="premium-header p-6 pb-4">
                   <div className="flex items-center justify-between">
                     <h3 className="text-xl font-bold text-white">3D Visualization</h3>
-                    <div className="premium-3d-badges">
-                      <span className="premium-style-badge">{shelfParams.shelfStyle}</span>
-                      <span className="premium-finish-badge">{shelfParams.color}</span>
+                    <div className="flex items-center space-x-3">
+                      <div className="premium-3d-badges">
+                        <span className="premium-style-badge">{shelfParams.shelfStyle}</span>
+                        <span className="premium-finish-badge">{shelfParams.color}</span>
+                      </div>
+                      <button
+                        onClick={handleDownload3DModel}
+                        className="premium-download-btn"
+                        title="Download 3D model as STL file for SolidWorks"
+                      >
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                        </svg>
+                        Download STL
+                      </button>
                     </div>
                   </div>
                 </div>
                 <div className="px-6 pb-6">
-                  <WireShelf3D {...shelfParams} />
+                  <WireShelf3D ref={shelf3DRef} {...shelfParams} />
                   <div className="premium-3d-footer">
                     <p>Interactive 3D Model • Photorealistic Rendering • Real-time Updates</p>
                   </div>

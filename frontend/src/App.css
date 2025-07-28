@@ -855,6 +855,39 @@ body {
   }
 }
 
+/* Premium Download Button */
+.premium-download-btn {
+  display: flex;
+  align-items: center;
+  padding: var(--space-3) var(--space-6);
+  background: linear-gradient(135deg, #1a2e1a 0%, #2a3a2a 100%);
+  color: var(--premium-text-primary);
+  border: 1px solid var(--premium-accent-dark);
+  border-radius: var(--space-3);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  transition: var(--transition-fast);
+  box-shadow: var(--shadow-medium);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.premium-download-btn:hover {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-glow);
+  border-color: var(--premium-accent);
+}
+
+.premium-download-btn:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-medium);
+}
+
+.premium-download-btn svg {
+  flex-shrink: 0;
+}
+
 /* Dark Mode Support (Future Enhancement) */
 @media (prefers-color-scheme: dark) {
   /* Dark mode variables can be added here in future versions */
