@@ -239,7 +239,7 @@ async def chat_with_ai(chat_request: ChatMessage):
         # Call Cerebras API
         completion_response = cerebras_client.chat.completions.create(
             messages=messages,
-            model="llama-4-scout-17b-16e-instruct",
+            model="llama-3.3-70b",
             stream=False,
             max_completion_tokens=4916,
             temperature=0,
